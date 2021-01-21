@@ -48,7 +48,7 @@ diffSpliceDGE.wrapper <- function(se, design, coef=NULL, QLF=TRUE, robust=TRUE,
 
   ep <- res$exon.p.value
   if(!is.null(excludeTypes)) ep[rowData(se)$type %in% excludeTypes] <- 1
-  metadata(se)$gene.q.values <- simes.aggregation(ep, res$genes[,2], res$genes[,1])
+  metadata(se)$gene.q.values <- simes.aggregation(ep, res$genes[,2])
   se
 }
 
@@ -81,7 +81,7 @@ diffSplice.wrapper <- function(se, design, coef, robust=TRUE, filter=TRUE, impro
 
   ep <- res$p.value
   if(!is.null(excludeTypes)) ep[rowData(se)$type %in% excludeTypes] <- 1
-  metadata(se)$gene.q.values <- simes.aggregation(ep, res$genes[,2], res$genes[,1])
+  metadata(se)$gene.q.values <- simes.aggregation(ep, res$genes[,2])
   se
 }
 
