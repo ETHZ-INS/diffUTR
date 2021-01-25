@@ -9,7 +9,7 @@
 #' plotting)
 #' @param ... Passed to `Rsubread::featureCounts`
 #'
-#' @return A SummarizedExperiment
+#' @return A \link[SummarizedExperiment]{RangedSummarizedExperiment-class}
 #' @import SummarizedExperiment GenomicRanges
 #' @importFrom Rsubread featureCounts
 #' @importFrom edgeR DGEList cpm calcNormFactors
@@ -26,15 +26,17 @@ countFeatures <- function(bamfiles, bins, strandSpecific=1,
   names(binsframe)[names(binsframe) == "seqnames"] <- "Chr"
   binsframe$GeneID <- names(bins)
 
+  if(is.null(names(bamfiles))) names(bamfiles) <- .cleanNames(bamfiles)
+  
   hits <- Rsubread::featureCounts( bamfiles, ...,
                                    annot.ext=binsframe,
                                    isGTFAnnotationFile=FALSE,
                                    strandSpecific=strandSpecific,
                                    allowMultiOverlap=allowMultiOverlap,
                                    useMetaFeatures=FALSE )
-
   se <- SummarizedExperiment(list(counts=as.matrix(hits$counts)),rowRanges=bins)
-  assays(se)$logcpm <- log1p(cpm(calcNormFactors(assay(se))))
+  colnames(se) <- names(bamfiles)
+  assays(se)$logcpm <- log1p(cpm(calcNormFactors(DGEList(assay(se)))))
   assays(se)$logNormDensity <- log1p(exp(assays(se)$logcpm)/width(se))
   rowData(se)$meanLogCPM <- rowMeans(assays(se)$logcpm)
   rowData(se)$logWidth <- log1p(width(se))

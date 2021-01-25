@@ -29,7 +29,7 @@ plotting)}
 \item{...}{Passed to `Rsubread::featureCounts`}
 }
 \value{
-A SummarizedExperiment
+A \link[SummarizedExperiment]{RangedSummarizedExperiment-class}
 }
 \description{
 countFeatures

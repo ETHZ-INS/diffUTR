@@ -6,13 +6,14 @@
 \usage{
 prepareBins(
   g,
-  APA,
+  APA = NULL,
   onlyMainChr = TRUE,
   removeAntisense = TRUE,
   chrStyle = "UCSC",
   maxUTRbinSize = 15000,
   codingOnly = FALSE,
   genewise = FALSE,
+  stranded = FALSE,
   verbose = TRUE
 )
 }
@@ -35,6 +36,8 @@ containing the alternative poly-A site database}
 
 \item{genewise}{Logical, whether annotation should be flattened genewise}
 
+\item{stranded}{Logical, whether to perform disjoin in a stranded fashion.}
+
 \item{verbose}{Logical, whether to print run information}
 }
 \value{
@@ -49,4 +52,7 @@ library(AnnotationHub)
 ah <- AnnotationHub()
 ensdb <- ah[[rev(query(ah, c("EnsDb", "Mus musculus"))$ah_id)[1]]]
 bins <- prepareBins(ensdb, apa)
+}
+\author{
+Stefan Greber
 }

@@ -10,18 +10,29 @@
 diffSpliceDGE.wrapper(
   se,
   design,
-  coef,
+  coef = NULL,
   QLF = TRUE,
   robust = TRUE,
-  filter = TRUE
+  countFilter = TRUE,
+  excludeTypes = NULL
 )
 
-diffSplice.wrapper(se, design, robust = TRUE)
+diffSplice.wrapper(
+  se,
+  design,
+  coef = NULL,
+  robust = TRUE,
+  filter = TRUE,
+  improved = TRUE,
+  countFilter = TRUE,
+  excludeTypes = NULL
+)
 
 DEXSeq.wrapper(
   se,
   design = ~sample + exon + condition:exon,
   reducedModel = ~sample + exon,
+  excludeTypes = NULL,
   ...
 )
 }
@@ -39,14 +50,14 @@ or `diffSpliceDGE.wrapper` only) a model.matrix.}
 \item{robust}{Logical; whether to use robust fitting for the dispersion trend
 (ignored for `DEXSeq.wrapper`).}
 
-\item{reducedModel}{A reduced formula (applicable only to `DEXSeq.wrapper`).}
-
 \item{countFilter}{Logical; whether to filter out low-count bins (ignored for
 `DEXSeq.wrapper`).}
 
 \item{excludeTypes}{A vector of bin types to ignore for testing. To test for any kind
 of differential usage, leave empty. To test for differential UTR usage, use
 `excludeTypes=c("CDS","non-coding")`.}
+
+\item{reducedModel}{A reduced formula (applicable only to `DEXSeq.wrapper`).}
 }
 \value{
 The `se` object with additional rowData columns contain bin (i.e. exon) -level

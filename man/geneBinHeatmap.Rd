@@ -8,7 +8,9 @@ geneBinHeatmap(
   se,
   gene,
   what = c("logNormDensity", "logCPM", "scaledLogCPM"),
-  anno_rows = c("logWidth", "meanLogCPM", "meanLogDensity", "log10PValue"),
+  anno_rows = c("type", "logWidth", "meanLogDensity", "log10PValue"),
+  anno_colors = list(),
+  merge_legends = TRUE,
   ...
 )
 }
@@ -20,6 +22,11 @@ geneBinHeatmap(
 \item{what}{Type of values (i.e. assay) to plot}
 
 \item{anno_rows}{Row annotation columns (i.e. columns of `rowData(se)`) to plot}
+
+\item{anno_colors}{Annotation colors (passed to `SEtools::sechm`)}
+
+\item{merge_legends}{Logical; whether to merge legends. This effectively 
+calls `draw(..., merge_legends=TRUE)` around the heatmap.}
 
 \item{...}{Passed to `sechm` (see \code{\link[SEtools]{SE-heatmap}}).}
 }

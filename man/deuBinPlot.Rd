@@ -8,13 +8,14 @@ deuBinPlot(
   se,
   gene,
   type = c("summary", "condition", "sample"),
-  intronSize = 1,
+  intronSize = 2,
   exonSize = c("sqrt", "linear", "log"),
   y = NULL,
   condition = NULL,
   size = "meanLogDensity",
   lineSize = 1,
-  colour = NULL
+  colour = NULL,
+  alpha = NULL
 )
 }
 \arguments{
@@ -27,8 +28,8 @@ such as \code{\link{diffSplice.wrapper}} or \code{\link{DEXSeq.wrapper}})}
 \item{type}{Either 'summary' (plot DEU summary), 'sample' (plot sample-wise data), or
 'condition' (plot data aggregate by condition)}
 
-\item{intronSize}{Intron plot size. If <=1, total intron size will be this fraction of
-the total exon size. If >1, each intron will have the given size.}
+\item{intronSize}{Intron plot size. If <=3, intron size will be this fraction of
+the mean exon size. If >3, each intron will have the given size.}
 
 \item{exonSize}{Scaling for exon sizes, either 'sqrt', 'log', or 'linear'.}
 
@@ -41,8 +42,9 @@ the total exon size. If >1, each intron will have the given size.}
 
 \item{lineSize}{Size of the line connecting the bins. Use `lineSize=0` to omit the line.}
 
-\item{colour}{rowData variable to use to determine the colour of the bins (can also
-be `condition` or `sample` when using the corresponding plot `type`)}
+\item{colour}{rowData variable to use to determine the colour of the bins.
+If `type="condition"`, can also be "condition"; if `type="sample"` can be
+any colData column.}
 }
 \value{
 A ggplot object
