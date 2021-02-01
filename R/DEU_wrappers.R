@@ -88,7 +88,9 @@ diffSplice.wrapper <- function(se, design, coef=NULL, robust=TRUE, filter=TRUE, 
 
   se <- se[row.names(res$p.value),]
   ep <- res$p.value[,coef]
-  rowData(se) <- cbind(rowData(se), res$coefficients, bin.p.value=ep)
+  tmp <- rowData(se)[,setdiff(colnames(rowData(se)),
+                              c(colnames(res$coefficients),"bin.p.value"))]
+  rowData(se) <- cbind(tmp, res$coefficients, bin.p.value=ep)
   rowData(se)$bin.FDR <- p.adjust(ep)
 
   if(!is.null(excludeTypes)) ep[rowData(se)$type %in% excludeTypes] <- 1
@@ -107,6 +109,11 @@ diffSplice.wrapper <- function(se, design, coef=NULL, robust=TRUE, filter=TRUE, 
 #' @rdname DEUwrappers
 DEXSeq.wrapper <- function(se, design=~sample+exon+condition:exon,
                            reducedModel=~sample+exon, excludeTypes=NULL, ...){
+  if(!("exon" %in% labels(terms(design))))
+    stop("For DEXSeq, the formula should include the extra 'sample' and 'exon'",
+         " terms.\nFor instance, if you wanted to test for an effect of the ",
+         "variable 'condition' on bin usage, you would use:\n",
+         "~sample+exon+condition:exon")
   se <- .checkSE(se)
   e <- floor(as.matrix(assays(se)$counts))
   e <- matrix(as.integer(e), nrow=nrow(e))
@@ -121,14 +128,14 @@ DEXSeq.wrapper <- function(se, design=~sample+exon+condition:exon,
   dds <- estimateExonFoldChanges( dds, fitExpToVar=vars, ... )
   res <- DEXSeqResults( dds )
 
-  exonBaseMean <- res$exonBaseMean
-  log2fc <- res[[grep("log2fold",names(res))]]
-  rowData(se) <- cbind(rowData(se),exonBaseMean,log2fc,bin.p.value=res$pvalue)
+  rowData(se)$log2fc <- res[[grep("log2fold",names(res))]]
+  rowData(se)$exonBaseMean <- res$exonBaseMean
+  rowData(se)$bin.p.value <- res$pvalue
 
   if(!is.null(excludeTypes)) res$pvalue[rowData(se)$type %in% excludeTypes] <- 1
   rowData(se)$bin.FDR <- p.adjust(res$pvalue)
   
-  d <- DataFrame(bin.pval=res$pvalue, coef=log2fc, gene=rowData(se)$gene, 
+  d <- DataFrame(bin.pval=res$pvalue, coef=rowData(se)$log2fc, gene=rowData(se)$gene, 
                  width=width(se), meanLogDensity=rowData(se)$meanLogDensity)
   if("gene_name" %in% colnames(rowData(se)))
     d$gene_name <- rowData(se)$gene_name

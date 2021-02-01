@@ -110,7 +110,6 @@ diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
   exon.t <- exon.coefficients / exon.stdev.unscaled / sqrt(exon.s2.post)
   gene.F <- rowsum(exon.t^2,geneid,reorder=FALSE) / gene.df.test
 
-
   exon.p.value <- 2 * pt(abs(exon.t), df=gene.df.total[g], lower.tail=FALSE)
   gene.F.p.value <- pf(gene.F, df1=gene.df.test, df2=gene.df.total, lower.tail=FALSE)
 

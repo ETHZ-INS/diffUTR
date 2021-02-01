@@ -69,6 +69,13 @@ simes.aggregation <- function(p.value, geneid){
     d <- d[order(d$gene, lengths(d$gene_name)),c("gene","gene_name")]
     d <- d[!duplicated(d$gene),]
     row.names(d) <- d$gene
+    if(is(d$gene_name,"FactorList"))
+      d$gene_name <- as(d$gene_name, "CharacterList")
+    if(is(d$gene_name,"CharacteList")){
+      d$name <- unstrsplit(d$gene_name, sep = "/")
+    }else{
+      d$name <- d$gene_name
+    }
     d$name <- unstrsplit(d$gene_name, sep = "/")
     d2 <- merge(d[,"name",drop=FALSE], d2, by="row.names")
     row.names(d2) <- d2$Row.names

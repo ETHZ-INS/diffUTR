@@ -23,7 +23,7 @@ geneBinHeatmap <- function(se, gene,
                            anno_colors=list(), merge_legends=TRUE, ...){
   se <- .checkSE(se, checkNorm=TRUE)
   if(length(w <- .matchGene(se, gene))==0) stop("Gene not found!")
-  se <- se[w,]
+  se <- sort(se[w,])
   what <- match.arg(what)
   if("log10PValue" %in% anno_rows && 
      !("log10PValue" %in% colnames(rowData(se))))
@@ -106,7 +106,7 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
     }
   }
   
-  se <- se[w,]
+  se <- sort(se[w,])
   de <- rowData(se)
   if(y=="geneNormDensity" && !("geneNormDensity" %in% assayNames(se))){
     si <- vapply(split(seq_len(ncol(se)), se[[condition]]), 
@@ -114,7 +114,7 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
                    mean(matrixStats::colMedians(assays(se)$logNormDensity[,i]))
                  })
     assays(se)$geneNormDensity <- 
-      log(t(exp(t(assays(se)$logNormDensity))/si[se[[condition]]]))
+      t(t(assays(se)$logNormDensity)-si[se[[condition]]])
   }
   
   if(size=="type"){
@@ -169,12 +169,12 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
       p <- p + geom_segment(data=d2,
                             aes_string(x="x_start", xend="x_end", y="y_start",
                                        yend="y_end", linetype="type", colour=colour),
-                            size=lineSize, alpha=alpha)
+                            size=lineSize, alpha=min(0.6,alpha))
     }else{
       p <- p + geom_segment(data=d2,
                             aes_string(x="x_start", xend="x_end", y="y_start",
                                        yend="y_end", linetype="type", group=type),
-                            colour="grey", size=lineSize, alpha=alpha)
+                            colour="grey", size=lineSize, alpha=min(0.6,alpha))
     }
   }
   if(colour=="type" && type!="sample")
@@ -218,10 +218,18 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
 #' @import ggplot2
 #' @importFrom ggrepel geom_text_repel
 plotTopGenes <- function(se, n=25, FDR=0.05, diffUTR=FALSE, alpha=NULL){
-  se <- .checkSE(se, requireStats=TRUE)
-  if(is(se, "SummarizedExperiment")) se <- metadata(se)$geneLevel
+  if(is(se, "SummarizedExperiment")){
+    se <- .checkSE(se, requireStats=TRUE)
+    se <- metadata(se)$geneLevel
+  }
   stopifnot(!is.null(se) && (is.data.frame(se) || is(se,"DFrame")))
   se <- as.data.frame(se)
+  if(length(w <- which(se$q.value<=0))>0){
+    minnzq <- -log10(min(se$q.value[-w],na.rm=TRUE))
+    score <- abs(se[[ifelse(diffUTR,"sizeScore","w.abs.coef")]])
+    o <- order(order(score[w]))
+    se$q.value[w] <- 10^-(minnzq+o*minnzq/(4*length(w)))
+  }
   if(diffUTR){
     if(is.null(alpha)) alpha <- 1
     p <- ggplot(se, aes(sizeScore, -log10(q.value))) + 
@@ -231,20 +239,21 @@ plotTopGenes <- function(se, n=25, FDR=0.05, diffUTR=FALSE, alpha=NULL){
     de$tmp <- abs(-log10(de$q.value)*de$sizeScore)
   }else{
     se$tmp <- -log10(se$q.value)*se$w.abs.coef
-    p <- ggplot(se, aes(w.abs.coef, -log10(q.value)))
     if(is.null(alpha)){
-      p <- p + geom_point(aes(colour=density.ratio, size=geneMeanDensity, 
-                              alpha=abs(tmp))) + scale_alpha(guide=FALSE)
+      p <- ggplot(se, aes(w.abs.coef, -log10(q.value))) + 
+        geom_point(aes(colour=density.ratio, size=geneMeanDensity, 
+                       alpha=abs(tmp))) + scale_alpha(guide=FALSE)
       
     }else{
-      p <- p + geom_point(aes(colour=density.ratio, size=geneMeanDensity),
-                          alpha=alpha)
+      p <- ggplot(se, aes(w.abs.coef, -log10(q.value))) + 
+        geom_point(aes(colour=density.ratio, size=geneMeanDensity), 
+                   alpha=alpha)
     }
     p <- p + xlab("Weighted absolute coefficient")
     de <- se[se$q.value<FDR,,drop=FALSE]
   }
   if(n>0){
-    de <- de[head(order(de$tmp, decreasing=TRUE),n),]
+    de <- de[head(order(de$tmp, decreasing=TRUE),n),,drop=FALSE]
     if(is.null(de$name)) de$name <- row.names(de)
     p <- p + geom_text_repel(data=de, aes(label=name))
   }
