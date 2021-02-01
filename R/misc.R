@@ -13,45 +13,59 @@ addNormalizedAssays <- function(se){
   se
 }
 
-#' simes.aggregation
-#'
-#' Simes p-value correction and aggregation, adapted from \code{link[limma]{diffSplice}}
-#'
-#' @param p.value A vector of p-values
-#' @param geneid A vector of group labels such as gene identifiers
-#'
-#' @return A named vector of aggregated p-values
-#' @export
-#'
-#' @examples
-simes.aggregation <- function(p.value, geneid){
-  stopifnot(is.numeric(p.value))
-  stopifnot(length(p.value)==length(geneid))
-  o <- order(geneid)
-  geneid <- geneid[o]
-  p.value <- p.value[o]
+#' @importFrom stringi stri_reverse
+.cleanNames <- function(x){
+  x <- gsub(" ","_",gsub("-","_",gsub("/",".",x,fixed=TRUE),fixed=TRUE),fixed=TRUE)
+  x <- rmLCS(rmLCS(x,"."),"_")
+  stri_reverse(rmLCS(rmLCS(stri_reverse(x),"."),"_"))
+}
 
-  ngenes <- length(unique(geneid))
 
-  gene.nexons <- rowsum(rep(1,length(p.value)), geneid, reorder=FALSE)
-  g <- rep(1:ngenes, times=gene.nexons)
+.matchGene <- function(se, x){
+  w <- which(rowData(se)$gene == x)
+  if(length(w)==0) w <- which(any(rowData(se)$gene_name == x))
+  w
+}
 
-  gene.lastexon <- cumsum(gene.nexons)
-  gene.firstexon <- gene.lastexon-gene.nexons+1
 
-  penalty <- rep_len(1L,length(g))
-  names(p.value)<-geneid
-  penalty[gene.lastexon] <- 1L-gene.nexons
-  penalty <- cumsum(penalty)[-gene.lastexon]
-  penalty <- penalty / rep(gene.nexons-1L,gene.nexons-1L)
-  g2 <- g[-gene.lastexon]
+# remove the longest common string at the beginning of all elements of a 
+# character vector
+rmLCS <- function(x, delim=""){
+  tmp <- strsplit(x,delim,fixed=TRUE)
+  if(any(lengths(tmp)==1)) return(x)
+  i <- 1
+  while(length(unique(sapply(tmp,FUN=function(x) x[i])))==1) i <- i+1
+  if(i==1) return(x)
+  sapply(tmp, FUN=function(x){
+    x <- x[!is.null(x)]
+    paste(x[-seq_len(i-1)], collapse=delim)
+  })
+}
 
-  gene.simes.p.value <- rep(1, length(gene.nexons))
+.typeColors <- function(){
+  c("3UTR"="#117733", "CDS"="#332288", "CDS/3UTR"="#44AA99", 
+    "CDS/UTR"="#44AA99", "CDS/UTR/3UTR"="#44AA99", "UTR"="#DDCC77", 
+    "UTR/3UTR"="#999933", "non-coding"="#CC6677")
+}
 
-  o <- order(g,p.value)
-  p.adj <- pmin(p.value[o][-gene.lastexon] / penalty, 1)
-  o <- order(g2,p.adj)
-  gene.simes.p.value <- p.adj[o][gene.firstexon-0L:(ngenes-1L)]
-
-  gene.simes.p.value
+.checkSE <- function(se, checkNorm=FALSE, requireStats=FALSE){
+  stopifnot(is(se,"RangedSummarizedExperiment"))
+  stopifnot(all(c("type","meanLogCPM","logWidth","meanLogDensity","gene") %in% 
+                  colnames(rowData(se))))
+  if(requireStats){
+    if( !all(c("bin.p.value","bin.FDR") %in% colnames(rowData(se))) ||
+        is.null(gl <- metadata(se)$geneLevel) || 
+        !(is.data.frame(gl) || is(gl, "DFrame")))
+      stop("The object does not contain differential bin usage statistics. ",
+           "You should run one of the DEU wrappers first (see `?DEUwrappers`).")
+  }
+  if(checkNorm){
+    if(!all(c("logcpm","logNormDensity") %in% assayNames(se))){
+      message("Computing normalized assays...")
+      message("To avoid doing this again for every plot, run:\n",
+              "se <- addNormalizedAssays(se)")
+      se <- addNormalizedAssays(se)
+    }
+  }
+  se
 }

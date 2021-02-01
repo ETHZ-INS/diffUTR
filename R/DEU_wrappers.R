@@ -27,6 +27,7 @@
 #' @rdname DEUwrappers
 diffSpliceDGE.wrapper <- function(se, design, coef=NULL, QLF=TRUE, robust=TRUE,
                                   countFilter=TRUE, excludeTypes=NULL){
+  se <- .checkSE(se)
   if(is(design, "formula"))
     design <- model.matrix(design, data=as.data.frame(colData(se)))
   if(is.null(coef)){
@@ -43,13 +44,20 @@ diffSpliceDGE.wrapper <- function(se, design, coef=NULL, QLF=TRUE, robust=TRUE,
   }
   res <- diffSpliceDGE(fit, coef=coef, geneid=rowData(se)$gene, exonid=row.names(se))
   se <- se[names(res$exon.p.value),]
-  rowData(se)$coefficient <- res$coefficients
+  co <- res$coefficients
+  if(!is.null(dim(co))) co <- co[,coef]
+  rowData(se)$coefficient <- co
   rowData(se)$bin.p.value <- res$exon.p.value
 
   ep <- res$exon.p.value
   if(!is.null(excludeTypes)) ep[rowData(se)$type %in% excludeTypes] <- 1
   rowData(se)$bin.FDR <- p.adjust(ep)
-  metadata(se)$gene.q.values <- simes.aggregation(ep, res$genes[,2])
+  
+  d <- DataFrame(bin.pval=ep,coef=rowData(se)$coefficient,gene=rowData(se)$gene, 
+                 width=width(se), meanLogDensity=rowData(se)$meanLogDensity)
+  if("gene_name" %in% colnames(rowData(se)))
+    d$gene_name <- rowData(se)$gene_name
+  metadata(se)$geneLevel <- .geneLevelStats(d=d)
   se
 }
 
@@ -57,8 +65,9 @@ diffSpliceDGE.wrapper <- function(se, design, coef=NULL, QLF=TRUE, robust=TRUE,
 #' @importFrom edgeR DGEList calcNormFactors filterByExpr
 #' @export
 #' @rdname DEUwrappers
-diffSplice.wrapper <- function(se, design, coef, robust=TRUE, filter=TRUE, improved=TRUE,
+diffSplice.wrapper <- function(se, design, coef=NULL, robust=TRUE, filter=TRUE, improved=TRUE,
                                countFilter=TRUE, excludeTypes=NULL){
+  se <- .checkSE(se)
   if(is(design, "formula"))
     design <- model.matrix(design, data=as.data.frame(colData(se)))
   if(is.null(coef)){
@@ -78,12 +87,18 @@ diffSplice.wrapper <- function(se, design, coef, robust=TRUE, filter=TRUE, impro
   }
 
   se <- se[row.names(res$p.value),]
-  rowData(se) <- cbind(rowData(se), res$coefficients, bin.p.value=res$p.value)
-
-  ep <- res$p.value
-  if(!is.null(excludeTypes)) ep[rowData(se)$type %in% excludeTypes] <- 1
+  ep <- res$p.value[,coef]
+  tmp <- rowData(se)[,setdiff(colnames(rowData(se)),
+                              c(colnames(res$coefficients),"bin.p.value"))]
+  rowData(se) <- cbind(tmp, res$coefficients, bin.p.value=ep)
   rowData(se)$bin.FDR <- p.adjust(ep)
-  metadata(se)$gene.q.values <- simes.aggregation(ep, res$genes[,2])
+
+  if(!is.null(excludeTypes)) ep[rowData(se)$type %in% excludeTypes] <- 1
+  d <- DataFrame(bin.pval=ep, coef=res$coefficients[,coef], gene=rowData(se)$gene, 
+                 width=width(se), meanLogDensity=rowData(se)$meanLogDensity)
+  if("gene_name" %in% colnames(rowData(se)))
+    d$gene_name <- rowData(se)$gene_name
+  metadata(se)$geneLevel <- .geneLevelStats(d=d)
   se
 }
 
@@ -94,6 +109,12 @@ diffSplice.wrapper <- function(se, design, coef, robust=TRUE, filter=TRUE, impro
 #' @rdname DEUwrappers
 DEXSeq.wrapper <- function(se, design=~sample+exon+condition:exon,
                            reducedModel=~sample+exon, excludeTypes=NULL, ...){
+  if(!("exon" %in% labels(terms(design))))
+    stop("For DEXSeq, the formula should include the extra 'sample' and 'exon'",
+         " terms.\nFor instance, if you wanted to test for an effect of the ",
+         "variable 'condition' on bin usage, you would use:\n",
+         "~sample+exon+condition:exon")
+  se <- .checkSE(se)
   e <- floor(as.matrix(assays(se)$counts))
   e <- matrix(as.integer(e), nrow=nrow(e))
   dds <- DEXSeqDataSet(e, sampleData=as.data.frame(colData(se)),
@@ -107,15 +128,19 @@ DEXSeq.wrapper <- function(se, design=~sample+exon+condition:exon,
   dds <- estimateExonFoldChanges( dds, fitExpToVar=vars, ... )
   res <- DEXSeqResults( dds )
 
-  exonBaseMean <- res$exonBaseMean
-  exon.p.value <- res$pvalue
-  log2fc <- res[[grep("log2fold",names(res))]]
-  rowData(se) <- cbind(rowData(se),exonBaseMean,log2fc,bin.p.value=exon.p.value)
+  rowData(se)$log2fc <- res[[grep("log2fold",names(res))]]
+  rowData(se)$exonBaseMean <- res$exonBaseMean
+  rowData(se)$bin.p.value <- res$pvalue
 
-  ep <- exon.p.value
   if(!is.null(excludeTypes)) res$pvalue[rowData(se)$type %in% excludeTypes] <- 1
-  rowData(se)$bin.FDR <- p.adjust(ep)
-  metadata(se)$gene.q.values <- perGeneQValue(res)
+  rowData(se)$bin.FDR <- p.adjust(res$pvalue)
+  
+  d <- DataFrame(bin.pval=res$pvalue, coef=rowData(se)$log2fc, gene=rowData(se)$gene, 
+                 width=width(se), meanLogDensity=rowData(se)$meanLogDensity)
+  if("gene_name" %in% colnames(rowData(se)))
+    d$gene_name <- rowData(se)$gene_name
+  message("Generating gene-level stats...")
+  metadata(se)$geneLevel <- .geneLevelStats(d=d, gene.qval=perGeneQValue(res))
 
   se
 }
