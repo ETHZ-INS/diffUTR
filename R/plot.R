@@ -19,17 +19,21 @@
 geneBinHeatmap <- function(se, gene, 
                            what=c("logNormDensity", "logCPM", "scaledLogCPM"),
                            anno_rows=c("type","logWidth","meanLogDensity",
-                                       "log10PValue"), 
+                                       "log10PValue","geneAmbiguous"), 
+                           removeAmbiguous=FALSE,
                            anno_colors=list(), merge_legends=TRUE, ...){
   se <- .checkSE(se, checkNorm=TRUE)
   if(length(w <- .matchGene(se, gene))==0) stop("Gene not found!")
   se <- sort(se[w,])
+  if(removeAmbiguous) se <- se[!rowData(se)$geneAmbiguous,]
   what <- match.arg(what)
   if("log10PValue" %in% anno_rows && 
      !("log10PValue" %in% colnames(rowData(se))))
     rowData(se)[["log10PValue"]] <- -log10(rowData(se)$bin.p.value)
   if("type" %in% anno_rows && is.null(anno_colors$type))
     anno_colors$type <- .typeColors()
+  if(removeAmbiguous | !any(rowData(se)$geneAmbiguous))
+    anno_rows <- setdiff(anno_rows, "geneAmbiguous")
   h <- sechm(se, row.names(se), do.scale=what=="scaledLogCPM", 
              show_rownames=FALSE, sortRowsOn=NULL, cluster_rows=FALSE, 
              row_title=paste(gene, "bins"), anno_rows=anno_rows, 
@@ -67,7 +71,7 @@ geneBinHeatmap <- function(se, gene,
 deuBinPlot <- function(se, gene, type=c("summary","condition","sample"), 
                        intronSize=2, exonSize=c("sqrt","linear","log"), y=NULL, 
                        condition=NULL, size="meanLogDensity", lineSize=1, 
-                       colour=NULL, alpha=NULL ){
+                       colour=NULL, alpha=NULL, removeAmbiguous=TRUE ){
   se <- .checkSE(se)
   type <- match.arg(type)
   exonSize <- match.arg(exonSize)
@@ -107,6 +111,7 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
   }
   
   se <- sort(se[w,])
+  if(removeAmbiguous) se <- se[!rowData(se)$geneAmbiguous,]
   de <- rowData(se)
   if(y=="geneNormDensity" && !("geneNormDensity" %in% assayNames(se))){
     si <- vapply(split(seq_len(ncol(se)), se[[condition]]), 

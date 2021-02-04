@@ -41,6 +41,26 @@ simes.aggregation <- function(p.value, geneid){
   gene.simes.p.value
 }
 
+geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL, returnSE=TRUE){
+  rd <- rowData(se)
+  if(!is.null(includeTypes)){
+    excludeTypes <- setdiff(levels(rd$type), includeTypes)
+  }
+  if(!is.null(excludeTypes)){
+    rd$bin.p.value[which(rd$type %in% excludeTypes)] <- 1
+  }
+  if(is.null(coef))
+    coef <- colnames(rd)[grep("bin.p.value",colnames(rd))-1]
+  
+  metadata(se)$geneLevel <- .geneLevelStats(DataFrame( 
+    bin.pval=rd$bin.p.value, coef=rd[[coef]], width=width(se),
+    gene=rd$gene, gene_name=rd$gene_name, meanLogDensity=rd$meanLogDensity))
+  
+  if(!returnSE) return(metadata(se)$geneLevel)
+  se
+}
+
+#' @import S4Vectors
 .geneLevelStats <- function(d, gene.qval=NULL){
   stopifnot(c("bin.pval","coef","gene","width","meanLogDensity") %in% colnames(d))
   if(is.null(gene.qval)) gene.qval <- simes.aggregation(d$bin.pval, d$gene)
