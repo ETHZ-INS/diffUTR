@@ -9,6 +9,9 @@
 #' @export
 #'
 #' @examples
+#' p <- runif(50)
+#' genes <- sample(LETTERS,50,replace=TRUE)
+#' simes.aggregation(p, genes)
 simes.aggregation <- function(p.value, geneid){
   stopifnot(is.numeric(p.value))
   stopifnot(length(p.value)==length(geneid))
@@ -19,7 +22,7 @@ simes.aggregation <- function(p.value, geneid){
   ngenes <- length(unique(geneid))
   
   gene.nexons <- rowsum(rep(1,length(p.value)), geneid, reorder=FALSE)
-  g <- rep(1:ngenes, times=gene.nexons)
+  g <- rep(seq_len(ngenes), times=gene.nexons)
   
   gene.lastexon <- cumsum(gene.nexons)
   gene.firstexon <- gene.lastexon-gene.nexons+1
@@ -41,7 +44,30 @@ simes.aggregation <- function(p.value, geneid){
   gene.simes.p.value
 }
 
-geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL, returnSE=TRUE){
+#' geneLevelStats
+#' 
+#' Aggregates bin-level statistics to the gene-level
+#'
+#' @param se A `RangedSummarizedExperiment` containing the results of one of the 
+#' DEU wrappers.
+#' @param coef The coefficients tested (if the model included more than one 
+#' term).
+#' @param excludeTypes Vector of bin types to exclude.
+#' @param includeTypes Vector of bin types to include (overrides `excludeTypes`)
+#' @param returnSE Logical; whether to return the updated `se` object (default),
+#'
+#' @return If `returnSE=TRUE` (default), returns the `se` object with an updated
+#' `metadata(se)$geneLevel` slot, otherwise returns the gene-level data.frame.
+#' @export
+#'
+#' @import S4Vectors
+#' @examples
+#' data(example_bin_se)
+#' se <- diffSplice.wrapper(example_bin_se, ~condition)
+#' se <- geneLevelStats(se, includeTypes="3UTR")
+#' head(metadata(se)$geneLevel)
+geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL, 
+                           returnSE=TRUE){
   rd <- rowData(se)
   if(!is.null(includeTypes)){
     excludeTypes <- setdiff(levels(rd$type), includeTypes)
@@ -60,9 +86,10 @@ geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL, 
   se
 }
 
-#' @import S4Vectors
+#' @importFrom methods is as
 .geneLevelStats <- function(d, gene.qval=NULL){
-  stopifnot(c("bin.pval","coef","gene","width","meanLogDensity") %in% colnames(d))
+  stopifnot(c("bin.pval","coef","gene","width","meanLogDensity") %in% 
+              colnames(d))
   if(is.null(gene.qval)) gene.qval <- simes.aggregation(d$bin.pval, d$gene)
   si <- split(seq_len(nrow(d)), d$gene)
   d2 <- data.frame( row.names=names(si))
@@ -77,7 +104,8 @@ geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL, 
        sizeScore=weighted.mean(d$coef[i], w*d$width[i]),
        abs.sizeScore=weighted.mean(abs(d$coef[i]), w*d$width[i]),
        geneMeanDensity=mean(d$meanLogDensity[i], trim=0.05),
-       density.ratio=weighted.mean(d$meanLogDensity[i]-mean(d$meanLogDensity[i]), w)
+       density.ratio=weighted.mean(d$meanLogDensity[i]-
+                                     mean(d$meanLogDensity[i]), w)
     )
   })
   d2 <- as.data.frame(t(d2))

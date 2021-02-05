@@ -5,7 +5,7 @@ author:
   affiliation:
   - D-HEST Institute for Neurosciences, ETH Zürich
   - Laboratory of Statistical Bioinformatics, University Zürich
-package: SEtools
+package: diffUTR
 output:
   BiocStyle::html_document
 abstract: |
@@ -30,13 +30,18 @@ library(BiocStyle)
 * An improved version of `r BiocStyle::Biocpkg(limma)`'s `diffSplice` method (see `?diffSplice.wrapper`)
 * `r BiocStyle::Biocpkg(edgeR)`'s `diffSpliceDGE` method (see `?diffSpliceDGE.wrapper`)
 
-All three wrappers have been designed to use the same input (the `RangedSummarizedExperiment` object created by `countFeatures` -- see below) and produce highly similar outputs, so that they can all be used with the same downstream plotting functions.
+All three wrappers have been designed to use the same input (the `RangedSummarizedExperiment` object created by `countFeatures` -- see below) and produce highly similar outputs, so that they can all be used with the same downstream plotting functions (Figure 1A).
 
-Based on various benchmarks (e.g. Sonenson et al. XXX), `r BiocStyle::Biocpkg(DEXSeq)` is the most accurate of the three methods, and should therefore be the method of choice. However, it does not scale well to larger sample sizes. We therefore suggest our improved _diffSplice2_ method (`?diffSplice.wrapper`) when `r BiocStyle::Biocpkg(DEXSeq)` is not an option.
+Based on various benchmarks (e.g. [Sonenson et al. 2016](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0862-3)), `r BiocStyle::Biocpkg(DEXSeq)` is the most accurate of the three methods, and should therefore be the method of choice. It is however very slow and does not scale well to larger sample sizes. We therefore suggest our improved _diffSplice2_ method (`?diffSplice.wrapper`) when `r BiocStyle::Biocpkg(DEXSeq)` is not an option.
+
+```{r echo = FALSE, fig.cap = "A: Overview of the diffUTR workflow. B: Bin creation scheme."}
+knitr::include_graphics(system.file('docs', 'figure1.svg', package = 'diffUTR'))
+```
 
 ## Differential 3' UTR usage
 
-`diffUTR` leverages the differential exon usage methods for differential 3' UTR analysis.
+`diffUTR` leverages the differential exon usage methods for differential 3' UTR analysis, using alternative poly-adenylation site databases to create additional UTR bins (Figure 1B).
+
 
 <br/><br/>
 
@@ -118,7 +123,7 @@ In this example only a subset of information was retained, but the original file
 For the purpose of this example, we will use the improved diffSplice method:
 
 ```{r}
-rse2 <- diffSplice.wrapper(rse, design = ~condition)
+rse <- diffSplice.wrapper(rse, design = ~condition)
 ```
 
 The `~condition` formula indicates that the samples should be split according to the `group` column of `colData(rse)`. Alternatively to the formula inferace, a `model.matrix` can be directly passed. For more complex models involving several terms, you will have to specify the coefficient to test using the `coef` argument.
@@ -143,30 +148,34 @@ The results are described in more detail below.
 
 ## Obtaining alternative poly-adenlyation sites and preparing the bins
 
-The preparation of the bins is done as in the standard DEU case, except that an additional argument should be given providing the alternative poly-adenylation (APA) sites. These will be used to break and extend UTRs into further bins. APA sites can be provided as a `r BiocStyle::Biocpkg(GenomicRanges)` object or the path to a `bed` file containing the coordinates. For mouse, human and C. elegans, an atlas of poly-A sites can be downloaded from https://polyasite.unibas.ch/atlas (\link[Herrmann et al. 2020]{https://doi.org/10.1093/nar/gkz918}). We download the mouse file and pass it to `prepareBins`, along with the gene anntoation:
+The preparation of the bins is done as in the standard DEU case, except that an additional argument should be given providing the alternative poly-adenylation (APA) sites. These will be used to break and extend UTRs into further bins. APA sites can be provided as a `r BiocStyle::Biocpkg(GenomicRanges)` object or the path to a `bed` file containing the coordinates. For mouse, human and C. elegans, an atlas of poly-A sites can be downloaded from https://polyasite.unibas.ch/atlas (\link[Herrmann et al. 2020]{https://doi.org/10.1093/nar/gkz918}). You can download the mouse file:
 
 ```{r, eval=FALSE}
 download.file("https://polyasite.unibas.ch/download/atlas/2.0/GRCm38.96/atlas.clusters.2.0.GRCm38.96.bed.gz", destfile="apa.mm38.bed.gz")
 bins <- prepareBins(g, "apa.mm38.bed.gz")
 ```
 
-Here we'll again work with an example reduced APA set saved with the package:
+Again, if you know that your data will be stranded, use `stranded=TRUE`.
 
-```{r}
-# If you know that your data will be stranded, use
-# bins <- prepareBins(g, "apa.mm38.bed.gz", stranded=TRUE)
-# Otherwise use
-bins <- prepareBins(g, "apa.mm38.bed.gz")
-```
+For the purpose of this example, we'll just use the same `bins` as in the first example.
 
 
-## Counting reads in bins
+## Counting and differential analysis:
+
+Counting reads in bins works as in the standard DEU case:
 
 ```{r, eval=FALSE}
 bamfiles <- c("path/to/sample1.bam", "path/to/sample2.bam", ...)
 se <- countFeatures(bamfiles, bins, strandSpecific=2, nthreads=6, isPairedEnd=TRUE)
 ```
 
+Differential analysis also works in the same way. By default, this will look for changes in _any_ bin type; if you want to restrict the gene-level aggregation to UTR bins, you can use:
+
+```{r}
+rse <- diffSplice.wrapper(rse, design = ~condition, excludeTypes = c("CDS","non-coding"))
+```
+
+See also `?geneLevelStats` for more options.
 
 <br/><br/>
 
@@ -183,6 +192,19 @@ plotTopGenes(rse)
 By default, the size of the points reflects the relative expression of the genes, and the colour the relative expression of the significant bins with respect to the gene (density ratio). This enables the rapid identification of changes occuring in highly-expressed genes, as well as discount changes happening in bins which tend not to be included in transcripts from that gene (low density ratio).
 
 The product is a `ggplot` object, and can be manipulated as such.
+
+By default, the gene-level statistics computed use all bin types. However, for the purpose of differential 3' UTR analysis, it is useful to restrict exclude coding sequence (CDS) bins (keeping bins that could be both) or limit ourselves to 3' UTR bins. This can be done by recomputing the gene-level statistics as follows:
+
+```{r}
+rse <- geneLevelStats(rse, includeTypes="3UTR")
+```
+
+We can then plot again the top genes, indicating that we are in differential UTR mode, which will use signed and width-weighted aggregation:
+
+```{r}
+plotTopGenes(rse, diffUTR = TRUE)
+```
+
 
 ## Gene profiles
 
@@ -202,12 +224,12 @@ deuBinPlot(rse,"Jund",type="condition",colour="condition", size="type",y="logcpm
   guides(colour = guide_legend(override.aes = list(size = 3)))
 ```
 
-
 Finally, `geneBinHeatmap` provides a compact, bin-per-sample heatmap representation of a gene, allowing the simultaneous visualization of various information: 
 
 ```{r}
 geneBinHeatmap(rse, "Smg6")
 ```
-Bins that are overlapping multiple genes will be either removed or flagged as such.
+
+Bins that are overlapping multiple genes will be flagged as such (here there are none).
 
 We found these representations particularly useful to prioritize candidates from differential bin usage analyses. For example, many genes show differential usage of bins which are generally not included in most transcripts of that gene (low count density), and are therefore less likely to be relevant. On the other hand, some genes show massive expression of a single bin which might (or might not) represent a different, unannotated transcript.

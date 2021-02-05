@@ -41,17 +41,17 @@ containing the alternative poly-A site database}
 \item{verbose}{Logical, whether to print run information}
 }
 \value{
-A GRanges
+A `GRanges` object.
 }
 \description{
 prepareBins
 }
+\details{
+See the vignette for more details.
+}
 \examples{
-# retrieve the latest mouse annotation
-library(AnnotationHub)
-ah <- AnnotationHub()
-ensdb <- ah[[rev(query(ah, c("EnsDb", "Mus musculus"))$ah_id)[1]]]
-bins <- prepareBins(ensdb, apa)
+data(example_gene_annotation)
+bins <- prepareBins(example_gene_annotation)
 }
 \author{
 Stefan Greber

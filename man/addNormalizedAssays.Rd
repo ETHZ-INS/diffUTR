@@ -7,11 +7,16 @@
 addNormalizedAssays(se)
 }
 \arguments{
-\item{se}{A bin-wise SummarizedExperiment as produced by \code{\link{countFeatures}}}
+\item{se}{A bin-wise `SummarizedExperiment` as produced by 
+\code{\link{countFeatures}}}
 }
 \value{
 The `se` object with populated `logcpm` and `logNormDensity` assays.
 }
 \description{
 addNormalizedAssays
+}
+\examples{
+data(example_bin_se)
+example_bin_se <- addNormalizedAssays(example_bin_se)
 }

@@ -8,8 +8,9 @@ geneBinHeatmap(
   se,
   gene,
   what = c("logNormDensity", "logCPM", "scaledLogCPM"),
-  anno_rows = c("type", "logWidth", "meanLogDensity", "log10PValue"),
+  anno_rows = c("type", "logWidth", "meanLogDensity", "log10PValue", "geneAmbiguous"),
   anno_colors = list(),
+  removeAmbiguous = FALSE,
   merge_legends = TRUE,
   ...
 )
@@ -25,6 +26,9 @@ geneBinHeatmap(
 
 \item{anno_colors}{Annotation colors (passed to `SEtools::sechm`)}
 
+\item{removeAmbiguous}{Logical; whether to remove bins that are 
+gene-ambiguous (i.e. overlap multiple genes).}
+
 \item{merge_legends}{Logical; whether to merge legends. This effectively 
 calls `draw(..., merge_legends=TRUE)` around the heatmap.}
 
@@ -35,4 +39,9 @@ A \code{\link[ComplexHeatmap]{Heatmap}}
 }
 \description{
 geneBinHeatmap
+}
+\examples{
+data(example_bin_se)
+se <- diffSplice.wrapper(example_bin_se, ~condition)
+geneBinHeatmap(se, "Jund")
 }

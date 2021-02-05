@@ -1,11 +1,13 @@
 #' DEUwrappers
 #'
-#' Wrappers around commonly-used DEU methods (\code{\link[edgeR]{diffSpliceDGE}},
-#' \code{\link[DEXSeq]{DEXSeq}} and an improved version of \code{\link[limma]{diffSplice}}
+#' Wrappers around commonly-used DEU methods 
+#' (\code{\link[edgeR]{diffSpliceDGE}}, \code{\link[DEXSeq]{DEXSeq}} and an 
+#' improved version of \code{\link[limma]{diffSplice}}
 #'
-#' @param se A bin-wise SummarizedExperiment as produced by \code{\link{countFeatures}}
-#' @param design A formula (using columns of `colData(se)`) or (for `diffSplice.wrapper`
-#' or `diffSpliceDGE.wrapper` only) a model.matrix.
+#' @param se A bin-wise SummarizedExperiment as produced by 
+#' \code{\link{countFeatures}}
+#' @param design A formula (using columns of `colData(se)`) or (for 
+#' `diffSplice.wrapper` or `diffSpliceDGE.wrapper` only) a model.matrix.
 #' @param reducedModel A reduced formula (applicable only to `DEXSeq.wrapper`).
 #' @param coef The coefficient to be tested (ignored for `DEXSeq.wrapper`).
 #' @param QLF Logical; whether to use edgeR's quasi-likelihood negative binomial
@@ -14,17 +16,22 @@
 #' (ignored for `DEXSeq.wrapper`).
 #' @param countFilter Logical; whether to filter out low-count bins (ignored for
 #' `DEXSeq.wrapper`).
-#' @param excludeTypes A vector of bin types to ignore for testing. To test for any kind
-#' of differential usage, leave empty. To test for differential UTR usage, use
-#' `excludeTypes=c("CDS","non-coding")`.
+#' @param excludeTypes A vector of bin types to ignore for testing. To test for
+#'  any kind of differential usage, leave empty. To test for differential UTR 
+#'  usage, use `excludeTypes=c("CDS","non-coding")` (or see 
+#'  \code{\link{geneLevelStats}} for more options).
 #'
-#' @return The `se` object with additional rowData columns contain bin (i.e. exon) -level
-#' statistics, and a metadata slot containing gene level p-values.
+#' @return The `se` object with additional rowData columns contain bin (i.e. 
+#' exon) -level statistics, and a metadata slot containing gene level p-values.
 #'
-#' @importFrom edgeR DGEList calcNormFactors glmQLFit glmFit diffSpliceDGE filterByExpr
+#' @importFrom edgeR DGEList calcNormFactors glmQLFit glmFit diffSpliceDGE filterByExpr estimateDisp
 #' @aliases DEUwrappers
 #' @export
 #' @rdname DEUwrappers
+#' @examples 
+#' data(example_bin_se)
+#' se <- diffSplice.wrapper(example_bin_se, ~condition)
+#' head(rowData(se))
 diffSpliceDGE.wrapper <- function(se, design, coef=NULL, QLF=TRUE, robust=TRUE,
                                   countFilter=TRUE, excludeTypes=NULL){
   se <- .checkSE(se)
@@ -61,6 +68,7 @@ diffSpliceDGE.wrapper <- function(se, design, coef=NULL, QLF=TRUE, robust=TRUE,
   se
 }
 
+#' @importFrom stats model.matrix
 #' @importFrom limma lmFit voom diffSplice
 #' @importFrom edgeR DGEList calcNormFactors filterByExpr
 #' @export
@@ -103,8 +111,8 @@ diffSplice.wrapper <- function(se, design, coef=NULL, robust=TRUE, filter=TRUE, 
 }
 
 
-#' @importFrom DEXSeq DEXSeqDataSet estimateSizeFactors estimateDispersions
-#' @importFrom DEXSeq estimateExonFoldChanges DEXSeqResults perGeneQValue
+#' @importFrom DEXSeq DEXSeqDataSet estimateSizeFactors estimateDispersions 
+#' @importFrom DEXSeq estimateExonFoldChanges DEXSeqResults perGeneQValue testForDEU
 #' @export
 #' @rdname DEUwrappers
 DEXSeq.wrapper <- function(se, design=~sample+exon+condition:exon,

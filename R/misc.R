@@ -1,12 +1,15 @@
 #' addNormalizedAssays
 #'
-#' @param se A bin-wise SummarizedExperiment as produced by \code{\link{countFeatures}}
+#' @param se A bin-wise `SummarizedExperiment` as produced by 
+#' \code{\link{countFeatures}}
 #'
 #' @return The `se` object with populated `logcpm` and `logNormDensity` assays.
 #' @export
 #'
 #' @importFrom edgeR DGEList cpm calcNormFactors
 #' @examples
+#' data(example_bin_se)
+#' example_bin_se <- addNormalizedAssays(example_bin_se)
 addNormalizedAssays <- function(se){
   assays(se)$logcpm <- log1p(cpm(calcNormFactors(DGEList(assay(se)))))
   assays(se)$logNormDensity <- log1p(exp(assays(se)$logcpm)/width(se))
@@ -15,7 +18,8 @@ addNormalizedAssays <- function(se){
 
 #' @importFrom stringi stri_reverse
 .cleanNames <- function(x){
-  x <- gsub(" ","_",gsub("-","_",gsub("/",".",x,fixed=TRUE),fixed=TRUE),fixed=TRUE)
+  x <- gsub(" ","_",gsub("-","_",gsub("/",".",x,fixed=TRUE),fixed=TRUE),
+            fixed=TRUE)
   x <- rmLCS(rmLCS(x,"."),"_")
   stri_reverse(rmLCS(rmLCS(stri_reverse(x),"."),"_"))
 }
@@ -36,7 +40,7 @@ rmLCS <- function(x, delim=""){
   i <- 1
   while(length(unique(sapply(tmp,FUN=function(x) x[i])))==1) i <- i+1
   if(i==1) return(x)
-  sapply(tmp, FUN=function(x){
+  vapply(tmp, FUN.VALUE=character(1), FUN=function(x){
     x <- x[!is.null(x)]
     paste(x[-seq_len(i-1)], collapse=delim)
   })
@@ -48,6 +52,7 @@ rmLCS <- function(x, delim=""){
     "UTR/3UTR"="#999933", "non-coding"="#CC6677")
 }
 
+#' @importFrom methods is
 .checkSE <- function(se, checkNorm=FALSE, requireStats=FALSE){
   stopifnot(is(se,"RangedSummarizedExperiment"))
   stopifnot(all(c("type","meanLogCPM","logWidth","meanLogDensity","gene") %in% 

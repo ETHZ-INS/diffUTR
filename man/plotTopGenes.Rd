@@ -30,3 +30,8 @@ A ggplot
 \description{
 plotTopGenes
 }
+\examples{
+data(example_bin_se)
+se <- diffSplice.wrapper(example_bin_se, ~condition)
+plotTopGenes(se)
+}

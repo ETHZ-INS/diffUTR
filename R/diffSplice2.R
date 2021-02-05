@@ -18,7 +18,7 @@
 diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
   #Exon Level squeeze, exon.s2.post t-test and weighting, sum of exon.df as gene.df after squeeze
   exon.genes <- fit$genes
-  if(is.null(exon.genes)) exon.genes <- data.frame(ExonID=1:nrow(fit))
+  if(is.null(exon.genes)) exon.genes <- data.frame(ExonID=seq_len(nrow(fit)))
 
   #	Get ID columns for genes and exons
   if(length(geneid)==1) {
@@ -43,7 +43,7 @@ diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
   #	Treat NA geneids as genes with one exon
   if(anyNA(geneid)) {
     isna <- which(is.na(geneid))
-    geneid[isna] <- paste0("NA",1:length(isna))
+    geneid[isna] <- paste0("NA",seq_along(isna))
   }
 
   #	Sort by geneid
@@ -103,7 +103,7 @@ diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
   gene.betabar <- rowsum(exon.coefficients*u2,geneid,reorder=FALSE) / u2.rowsum
 
   #	T-statistics for exon-level tests
-  g <- rep(1:ngenes,times=gene.nexons)
+  g <- rep(seq_len(ngenes), times=gene.nexons)
   exon.coefficients <- exon.coefficients-gene.betabar[g,,drop=FALSE]
   exon.1mleverage <- 1 - (u2 / u2.rowsum[g,,drop=FALSE])
   exon.coefficients <- exon.coefficients / exon.1mleverage
@@ -149,7 +149,7 @@ diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
   g2 <- g[-gene.lastexon]
 
   out$gene.simes.p.value <- gene.F.p.value
-  for (j in 1:ncol(fit)) {
+  for (j in seq_len(ncol(fit))) {
     o <- order(g,exon.p.value[,j])
     p.adj <- pmin(exon.p.value[o,j][-gene.lastexon] / penalty, 1)
     o <- order(g2,p.adj)

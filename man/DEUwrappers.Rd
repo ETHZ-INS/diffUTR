@@ -37,10 +37,11 @@ DEXSeq.wrapper(
 )
 }
 \arguments{
-\item{se}{A bin-wise SummarizedExperiment as produced by \code{\link{countFeatures}}}
+\item{se}{A bin-wise SummarizedExperiment as produced by 
+\code{\link{countFeatures}}}
 
-\item{design}{A formula (using columns of `colData(se)`) or (for `diffSplice.wrapper`
-or `diffSpliceDGE.wrapper` only) a model.matrix.}
+\item{design}{A formula (using columns of `colData(se)`) or (for 
+`diffSplice.wrapper` or `diffSpliceDGE.wrapper` only) a model.matrix.}
 
 \item{coef}{The coefficient to be tested (ignored for `DEXSeq.wrapper`).}
 
@@ -53,17 +54,24 @@ or `diffSpliceDGE.wrapper` only) a model.matrix.}
 \item{countFilter}{Logical; whether to filter out low-count bins (ignored for
 `DEXSeq.wrapper`).}
 
-\item{excludeTypes}{A vector of bin types to ignore for testing. To test for any kind
-of differential usage, leave empty. To test for differential UTR usage, use
-`excludeTypes=c("CDS","non-coding")`.}
+\item{excludeTypes}{A vector of bin types to ignore for testing. To test for
+any kind of differential usage, leave empty. To test for differential UTR 
+usage, use `excludeTypes=c("CDS","non-coding")` (or see 
+\code{\link{geneLevelStats}} for more options).}
 
 \item{reducedModel}{A reduced formula (applicable only to `DEXSeq.wrapper`).}
 }
 \value{
-The `se` object with additional rowData columns contain bin (i.e. exon) -level
-statistics, and a metadata slot containing gene level p-values.
+The `se` object with additional rowData columns contain bin (i.e. 
+exon) -level statistics, and a metadata slot containing gene level p-values.
 }
 \description{
-Wrappers around commonly-used DEU methods (\code{\link[edgeR]{diffSpliceDGE}},
-\code{\link[DEXSeq]{DEXSeq}} and an improved version of \code{\link[limma]{diffSplice}}
+Wrappers around commonly-used DEU methods 
+(\code{\link[edgeR]{diffSpliceDGE}}, \code{\link[DEXSeq]{DEXSeq}} and an 
+improved version of \code{\link[limma]{diffSplice}}
+}
+\examples{
+data(example_bin_se)
+se <- diffSplice.wrapper(example_bin_se, ~condition)
+head(rowData(se))
 }

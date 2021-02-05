@@ -15,7 +15,8 @@ deuBinPlot(
   size = "meanLogDensity",
   lineSize = 1,
   colour = NULL,
-  alpha = NULL
+  alpha = NULL,
+  removeAmbiguous = TRUE
 )
 }
 \arguments{
@@ -45,10 +46,18 @@ the mean exon size. If >3, each intron will have the given size.}
 \item{colour}{rowData variable to use to determine the colour of the bins.
 If `type="condition"`, can also be "condition"; if `type="sample"` can be
 any colData column.}
+
+\item{removeAmbiguous}{Logical; whether to remove bins that are 
+gene-ambiguous (i.e. overlap multiple genes).}
 }
 \value{
 A ggplot object
 }
 \description{
 deuBinPlot
+}
+\examples{
+data(example_bin_se)
+se <- diffSplice.wrapper(example_bin_se, ~condition)
+deuBinPlot(se, "Jund")
 }

@@ -5,6 +5,8 @@
 #' @param what Type of values (i.e. assay) to plot
 #' @param anno_rows Row annotation columns (i.e. columns of `rowData(se)`) to plot
 #' @param anno_colors Annotation colors (passed to `SEtools::sechm`)
+#' @param removeAmbiguous Logical; whether to remove bins that are 
+#' gene-ambiguous (i.e. overlap multiple genes).
 #' @param merge_legends Logical; whether to merge legends. This effectively 
 #' calls `draw(..., merge_legends=TRUE)` around the heatmap.
 #' @param ... Passed to `sechm` (see \code{\link[SEtools]{SE-heatmap}}).
@@ -16,12 +18,15 @@
 #' @importFrom ComplexHeatmap draw
 #'
 #' @examples
+#' data(example_bin_se)
+#' se <- diffSplice.wrapper(example_bin_se, ~condition)
+#' geneBinHeatmap(se, "Jund")
 geneBinHeatmap <- function(se, gene, 
                            what=c("logNormDensity", "logCPM", "scaledLogCPM"),
                            anno_rows=c("type","logWidth","meanLogDensity",
                                        "log10PValue","geneAmbiguous"), 
-                           removeAmbiguous=FALSE,
-                           anno_colors=list(), merge_legends=TRUE, ...){
+                           anno_colors=list(), removeAmbiguous=FALSE, 
+                           merge_legends=TRUE, ...){
   se <- .checkSE(se, checkNorm=TRUE)
   if(length(w <- .matchGene(se, gene))==0) stop("Gene not found!")
   se <- sort(se[w,])
@@ -62,12 +67,17 @@ geneBinHeatmap <- function(se, gene,
 #' @param colour rowData variable to use to determine the colour of the bins.
 #' If `type="condition"`, can also be "condition"; if `type="sample"` can be
 #' any colData column.
+#' @param removeAmbiguous Logical; whether to remove bins that are 
+#' gene-ambiguous (i.e. overlap multiple genes).
 #'
 #' @return A ggplot object
 #' @export
 #' @import ggplot2
 #'
 #' @examples
+#' data(example_bin_se)
+#' se <- diffSplice.wrapper(example_bin_se, ~condition)
+#' deuBinPlot(se, "Jund")
 deuBinPlot <- function(se, gene, type=c("summary","condition","sample"), 
                        intronSize=2, exonSize=c("sqrt","linear","log"), y=NULL, 
                        condition=NULL, size="meanLogDensity", lineSize=1, 
@@ -217,11 +227,14 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
 #'
 #' @return A ggplot
 #' @export
-#'
-#' @examples
 #' @importFrom S4Vectors metadata
 #' @import ggplot2
 #' @importFrom ggrepel geom_text_repel
+#'
+#' @examples
+#' data(example_bin_se)
+#' se <- diffSplice.wrapper(example_bin_se, ~condition)
+#' plotTopGenes(se)
 plotTopGenes <- function(se, n=25, FDR=0.05, diffUTR=FALSE, alpha=NULL){
   if(is(se, "SummarizedExperiment")){
     se <- .checkSE(se, requireStats=TRUE)
