@@ -26,13 +26,13 @@ library(BiocStyle)
 
 `diffUTR` wraps around three methods for different exon usage analysis:
 
-* The `r BiocStyle::Biocpkg(DEXSeq)` package (see `?DEXSeq.wrapper`)
-* An improved version of `r BiocStyle::Biocpkg(limma)`'s `diffSplice` method (see `?diffSplice.wrapper`)
-* `r BiocStyle::Biocpkg(edgeR)`'s `diffSpliceDGE` method (see `?diffSpliceDGE.wrapper`)
+* The `r BiocStyle::Biocpkg("DEXSeq")` package (see `?DEXSeq.wrapper`)
+* An improved version of `r BiocStyle::Biocpkg("limma")`'s `diffSplice` method (see `?diffSplice.wrapper`)
+* `r BiocStyle::Biocpkg("edgeR")`'s `diffSpliceDGE` method (see `?diffSpliceDGE.wrapper`)
 
 All three wrappers have been designed to use the same input (the `RangedSummarizedExperiment` object created by `countFeatures` -- see below) and produce highly similar outputs, so that they can all be used with the same downstream plotting functions (Figure 1A).
 
-Based on various benchmarks (e.g. [Sonenson et al. 2016](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0862-3)), `r BiocStyle::Biocpkg(DEXSeq)` is the most accurate of the three methods, and should therefore be the method of choice. It is however very slow and does not scale well to larger sample sizes. We therefore suggest our improved _diffSplice2_ method (`?diffSplice.wrapper`) when `r BiocStyle::Biocpkg(DEXSeq)` is not an option.
+Based on various benchmarks (e.g. [Sonenson et al. 2016](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0862-3)), `r BiocStyle::Biocpkg("DEXSeq")` is the most accurate of the three methods, and should therefore be the method of choice. It is however very slow and does not scale well to larger sample sizes. We therefore suggest our improved _diffSplice2_ method (`?diffSplice.wrapper`) when `r BiocStyle::Biocpkg("DEXSeq")` is not an option.
 
 ```{r echo = FALSE, fig.cap = "A: Overview of the diffUTR workflow. B: Bin creation scheme."}
 knitr::include_graphics(system.file('docs', 'figure1.svg', package = 'diffUTR'))
@@ -57,9 +57,13 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install("plger/diffUTR")
 ```
 
+```{r}
+library(diffUTR)
+```
+
 ## Obtaining gene annotations
 
-Prior to using `diffUTR` you will need a gene annotation. This can either be provided as a `gtf` file (with relatively standard formatting), or as an `r BiocStyle::Biocpkg(ensembldb)` object. For example, an `EnsDb` object for the latest mouse annotation can be fetched as follows:
+Prior to using `diffUTR` you will need a gene annotation. This can either be provided as a `gtf` file (with relatively standard formatting), or as an `r BiocStyle::Biocpkg("ensembldb")` object. For example, an `EnsDb` object for the latest mouse annotation can be fetched as follows:
 
 ```{r, eval=FALSE}
 library(AnnotationHub)
@@ -94,7 +98,7 @@ bins <- prepareBins(g)
 
 ## Counting reads in bins
 
-Counting reads (or fragments) overlapping bins is done using the `countFeatures` function, with a vector of paths to `bam` files as input. Under the hood, this calls the `featureCounts` function of the `r BiocStyle::Biocpkg(Rsubread)` package, so any argument of that function can be passed to `countFeatures`. For example:
+Counting reads (or fragments) overlapping bins is done using the `countFeatures` function, with a vector of paths to `bam` files as input. Under the hood, this calls the `featureCounts` function of the `r BiocStyle::Biocpkg("Rsubread")` package, so any argument of that function can be passed to `countFeatures`. For example:
 
 ```{r, eval=FALSE}
 bamfiles <- c("path/to/sample1.bam", "path/to/sample2.bam", ...)
@@ -148,7 +152,7 @@ The results are described in more detail below.
 
 ## Obtaining alternative poly-adenlyation sites and preparing the bins
 
-The preparation of the bins is done as in the standard DEU case, except that an additional argument should be given providing the alternative poly-adenylation (APA) sites. These will be used to break and extend UTRs into further bins. APA sites can be provided as a `r BiocStyle::Biocpkg(GenomicRanges)` object or the path to a `bed` file containing the coordinates. For mouse, human and C. elegans, an atlas of poly-A sites can be downloaded from https://polyasite.unibas.ch/atlas (\link[Herrmann et al. 2020]{https://doi.org/10.1093/nar/gkz918}). You can download the mouse file:
+The preparation of the bins is done as in the standard DEU case, except that an additional argument should be given providing the alternative poly-adenylation (APA) sites. These will be used to break and extend UTRs into further bins. APA sites can be provided as a `r BiocStyle::Biocpkg("GenomicRanges")` object or the path to a `bed` file containing the coordinates. For mouse, human and C. elegans, an atlas of poly-A sites can be downloaded from https://polyasite.unibas.ch/atlas (\link[Herrmann et al. 2020]{https://doi.org/10.1093/nar/gkz918}). You can download the mouse file:
 
 ```{r, eval=FALSE}
 download.file("https://polyasite.unibas.ch/download/atlas/2.0/GRCm38.96/atlas.clusters.2.0.GRCm38.96.bed.gz", destfile="apa.mm38.bed.gz")
@@ -214,7 +218,7 @@ The package also offers two functions for plotting bin-level profiles for a spec
 rse <- addNormalizedAssays(rse)
 ```
 
-`deuBinPlot` provides plots similar to those produced by `r BiocStyle::Biocpkg(DEXSeq)` and `r BiocStyle::Biocpkg(limma)`, but offering more flexibility. They can be plotted as overall bin statistics, per condition, or per sample, and can plot various types of values. Importantly, since all data and annotation is contained in the object, these can easily be included in the plots, mapping for instance to colour or shape:
+`deuBinPlot` provides plots similar to those produced by `r BiocStyle::Biocpkg("DEXSeq")` and `r BiocStyle::Biocpkg("limma")`, but offering more flexibility. They can be plotted as overall bin statistics, per condition, or per sample, and can plot various types of values. Importantly, since all data and annotation is contained in the object, these can easily be included in the plots, mapping for instance to colour or shape:
 
 ```{r}
 deuBinPlot(rse,"Jund", type="condition", colour="condition")
