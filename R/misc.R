@@ -4,15 +4,18 @@
 #' \code{\link{countFeatures}}
 #'
 #' @return The `se` object with populated `logcpm` and `logNormDensity` assays.
+#' @param readLength Used as a minimum width to estimate read density 
+#' (default 50).
 #' @export
 #'
 #' @importFrom edgeR DGEList cpm calcNormFactors
 #' @examples
 #' data(example_bin_se)
 #' example_bin_se <- addNormalizedAssays(example_bin_se)
-addNormalizedAssays <- function(se){
-  assays(se)$logcpm <- log1p(cpm(calcNormFactors(DGEList(assay(se)))))
-  assays(se)$logNormDensity <- log1p(exp(assays(se)$logcpm)/width(se))
+addNormalizedAssays <- function(se, readLength=50L){
+  cpm <- cpm(calcNormFactors(DGEList(assay(se))))
+  assays(se)$logcpm <- log1p(cpm)
+  assays(se)$logNormDensity <- log1p(1000*cpm/pmax(width(se),readLength))
   se
 }
 

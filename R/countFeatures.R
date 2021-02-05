@@ -4,6 +4,7 @@
 #' @param bins A GRanges of bins in which to count reads (or path to a rds file
 #' containing such an object
 #' @param strandSpecific Passed to `Rsubread::featureCounts`
+#' @param readLength Used as a minimum width to estimate read density.
 #' @param allowMultiOverlap Passed to `Rsubread::featureCounts`
 #' @param inclNormalized Logical; whether to include normalized assays (needed for
 #' plotting)
@@ -14,7 +15,7 @@
 #' @importFrom Rsubread featureCounts
 #' @importFrom edgeR DGEList cpm calcNormFactors
 #' @export
-countFeatures <- function(bamfiles, bins, strandSpecific=1,
+countFeatures <- function(bamfiles, bins, strandSpecific=1, readLength=50L,
                           allowMultiOverlap=TRUE, inclNormalized=TRUE, ...){
   if(is.character(bins) && length(bins)==1 && grepl("\\.rds$", bins)){
     bins <- readRDS(bins)
@@ -36,8 +37,9 @@ countFeatures <- function(bamfiles, bins, strandSpecific=1,
                                    useMetaFeatures=FALSE )
   se <- SummarizedExperiment(list(counts=as.matrix(hits$counts)),rowRanges=bins)
   colnames(se) <- names(bamfiles)
+  wi <- pmax(width(se),readLength)
   assays(se)$logcpm <- log1p(cpm(calcNormFactors(DGEList(assay(se)))))
-  assays(se)$logNormDensity <- log1p(exp(assays(se)$logcpm)/width(se))
+  assays(se)$logNormDensity <- log1p(exp(assays(se)$logcpm)/wi)
   rowData(se)$meanLogCPM <- rowMeans(assays(se)$logcpm)
   rowData(se)$logWidth <- log1p(width(se))
   rowData(se)$meanLogDensity <- rowMeans(assays(se)$logNormDensity)

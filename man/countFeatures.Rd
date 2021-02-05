@@ -8,6 +8,7 @@ countFeatures(
   bamfiles,
   bins,
   strandSpecific = 1,
+  readLength = 50L,
   allowMultiOverlap = TRUE,
   inclNormalized = TRUE,
   ...
@@ -20,6 +21,8 @@ countFeatures(
 containing such an object}
 
 \item{strandSpecific}{Passed to `Rsubread::featureCounts`}
+
+\item{readLength}{Used as a minimum width to estimate read density.}
 
 \item{allowMultiOverlap}{Passed to `Rsubread::featureCounts`}
 
