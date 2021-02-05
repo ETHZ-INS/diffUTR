@@ -19,7 +19,7 @@
 #' 
 #' @author Stefan Greber
 #' @export
-#' @import GenomicRanges rtracklayer
+#' @import GenomicRanges rtracklayer GenomeInfoDb
 #' @examples
 #' data(example_gene_annotation)
 #' bins <- prepareBins(example_gene_annotation)

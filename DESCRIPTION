@@ -9,7 +9,7 @@ Authors@R: c(
 Description: Provides a uniform interface and plotting functions for limma/edgeR/DEXSeq -powered differential exon usage, 
 	as well as their application to differential UTR usage analysis using poly-A site databases. Includes in addition an
 	improved version of the limma::diffSplice method.
-Imports: S4Vectors, SummarizedExperiment, limma, edgeR, DEXSeq, GenomicRanges, SEtools, Rsubread, ggplot2, rtracklayer, ComplexHeatmap, ggrepel, stringi, methods, stats
+Imports: S4Vectors, SummarizedExperiment, limma, edgeR, DEXSeq, GenomicRanges, SEtools, Rsubread, ggplot2, rtracklayer, ComplexHeatmap, ggrepel, stringi, methods, stats, GenomeInfoDb
 Suggests: BiocStyle, knitr
 biocViews: GeneExpression
 VignetteBuilder: knitr

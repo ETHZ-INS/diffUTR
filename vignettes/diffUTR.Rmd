@@ -57,8 +57,13 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install("plger/diffUTR")
 ```
 
+We load diffUTR as well as the `r BiocStyle::Biocpkg("SummarizedExperiment")` package on which it depends:
+
 ```{r}
-library(diffUTR)
+suppressPackageStartupMessages({
+  library(diffUTR)
+  library(SummarizedExperiment)
+})
 ```
 
 ## Obtaining gene annotations
@@ -114,7 +119,7 @@ rse <- example_bin_se
 rse
 ```
 
-The output of `countFeatures` is a RangedSummarizedExperiment object (see `r BiocStyle::Biocpkg(SummarizedExperiment)`) containing the samples' counts (as well as normalized assays) across bins, as well as all the bin information in the `rowRanges(se)`:
+The output of `countFeatures` is a RangedSummarizedExperiment object (see `r BiocStyle::Biocpkg("SummarizedExperiment")`) containing the samples' counts (as well as normalized assays) across bins, as well as all the bin information in the `rowRanges(se)`:
 
 ```{r}
 rse
@@ -221,11 +226,17 @@ rse <- addNormalizedAssays(rse)
 `deuBinPlot` provides plots similar to those produced by `r BiocStyle::Biocpkg("DEXSeq")` and `r BiocStyle::Biocpkg("limma")`, but offering more flexibility. They can be plotted as overall bin statistics, per condition, or per sample, and can plot various types of values. Importantly, since all data and annotation is contained in the object, these can easily be included in the plots, mapping for instance to colour or shape:
 
 ```{r}
+deuBinPlot(rse,"Jund")
 deuBinPlot(rse,"Jund", type="condition", colour="condition")
 deuBinPlot(rse,"Jund", type="sample", colour="condition") # shows separate samples
+```
 
-deuBinPlot(rse,"Jund",type="condition",colour="condition", size="type",y="logcpm") + 
-  guides(colour = guide_legend(override.aes = list(size = 3)))
+And since the output is a `ggplot`, we can modify it at will:
+```{r}
+library(ggplot2)
+deuBinPlot(rse,"Jund",type="condition",colour="condition") + 
+  guides(colour = guide_legend(override.aes = list(size = 3))) +
+  scale_colour_manual(values=c(CTRL="darkblue", LTP="red"))
 ```
 
 Finally, `geneBinHeatmap` provides a compact, bin-per-sample heatmap representation of a gene, allowing the simultaneous visualization of various information: 

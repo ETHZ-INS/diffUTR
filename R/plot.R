@@ -80,7 +80,7 @@ geneBinHeatmap <- function(se, gene,
 #' deuBinPlot(se, "Jund")
 deuBinPlot <- function(se, gene, type=c("summary","condition","sample"), 
                        intronSize=2, exonSize=c("sqrt","linear","log"), y=NULL, 
-                       condition=NULL, size="meanLogDensity", lineSize=1, 
+                       condition=NULL, size="type", lineSize=1, 
                        colour=NULL, alpha=NULL, removeAmbiguous=TRUE ){
   se <- .checkSE(se)
   type <- match.arg(type)
@@ -112,7 +112,7 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
       if(is.null(y)) stop("Please specify `y` among the rowData columns.")
     }else{
       if("logNormDensity" %in% assayNames(se)){
-        y <- ifelse(is.null(condition),"logNormDensity","geneNormDensity")
+        y <- "logNormDensity"
       }else{
         y <- assayNames(se)[1]
         message("Using assay '",y, "' (use `y` to specify another)")

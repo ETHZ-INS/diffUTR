@@ -12,7 +12,7 @@ deuBinPlot(
   exonSize = c("sqrt", "linear", "log"),
   y = NULL,
   condition = NULL,
-  size = "meanLogDensity",
+  size = "type",
   lineSize = 1,
   colour = NULL,
   alpha = NULL,
