@@ -40,8 +40,7 @@ knitr::include_graphics(system.file('docs', 'figure1.svg', package = 'diffUTR'))
 
 ## Differential 3' UTR usage
 
-`diffUTR` leverages the differential exon usage methods for differential 3' UTR analysis, using alternative poly-adenylation site databases to create additional UTR bins (Figure 1B).
-
+A chief difficulty in analyzing 3' UTR usage is that most UTR variants are not catalogued in standard transcript annotations, limiting the utility of standard transcript-level quantification based on reference transcripts. `diffUTR` leverages the differential exon usage methods for differential 3' UTR analysis using alternative poly-adenylation site databases to create additional UTR bins (Figure 1B).
 
 <br/><br/>
 
@@ -162,9 +161,17 @@ The preparation of the bins is done as in the standard DEU case, except that an 
 ```{r, eval=FALSE}
 download.file("https://polyasite.unibas.ch/download/atlas/2.0/GRCm38.96/atlas.clusters.2.0.GRCm38.96.bed.gz", destfile="apa.mm38.bed.gz")
 bins <- prepareBins(g, "apa.mm38.bed.gz")
+# (Again, if you know that your data will be stranded, use `stranded=TRUE`)
 ```
 
-Again, if you know that your data will be stranded, use `stranded=TRUE`.
+Unfortunately, the [polyASite](https://polyasite.unibas.ch/atlas) database does not contain APA sites for the rat. A somewhat older similar database, [PolyA_DB](https://exon.apps.wistar.org/PolyA_DB/v3/), does include the rat, however with an obsolete annotation; for convenience we lifted it over to Rno6, and made it available in the package data:
+
+```{r}
+data(rn6_PAS)
+# bins <- prepareBins(g, rn6_PAS)
+```
+
+If there is no APA sites database that includes your species of interest, you can still perform differential UTR analysis, however you will be limited to bins defined by the UTRs ends included in the gene annotation.
 
 For the purpose of this example, we'll just use the same `bins` as in the first example.
 
