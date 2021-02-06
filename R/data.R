@@ -24,3 +24,17 @@ NULL
 #'
 #' @return a `GRanges` object
 NULL
+
+#' @rdname rn6_PAS
+#' @name rn6_PAS
+#' @aliases rn6_PAS
+#'
+#' @title Poly-A sites compendium for Rattus Norvegicus (Rno6)
+#'
+#' @description
+#' These are the sites from polyA_DB release 3.2, downloaded from 
+#' \url{https://exon.apps.wistar.org/PolyA_DB/v3/download/3.2/rat_pas.zip}, 
+#' and lifted over to Rno6.
+#'
+#' @return a `GRanges` object
+NULL
