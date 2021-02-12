@@ -20,6 +20,8 @@
 #' @author Stefan Greber
 #' @export
 #' @import GenomicRanges rtracklayer GenomeInfoDb
+#' @importFrom S4Vectors mcols
+#' @importFrom IRanges FactorList CharacterList extractList
 #' @examples
 #' data(example_gene_annotation)
 #' bins <- prepareBins(example_gene_annotation)
