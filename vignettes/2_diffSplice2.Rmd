@@ -55,3 +55,5 @@ Using a simulation from a previous DEU benchmark [Soneson et al. 2016](https://d
 #knitr::include_graphics(system.file('docs', 'diffSplice2.png', package = 'diffUTR'))
 knitr::include_graphics("diffSplice2.png",dpi=75)
 ```
+
+Of note, however, in most settings the accuracy of `diffSplice2` is still inferior to that of `r BiocStyle::Biocpkg("DEXSeq")`, which therefore remains the method of choice for DEU. However, as the computationally-heavy `r BiocStyle::Biocpkg("DEXSeq")` does not scale well and is not applicable in all situations, we recommend `diffSplice2` as the next best method.
