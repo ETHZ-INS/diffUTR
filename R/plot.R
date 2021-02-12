@@ -72,6 +72,8 @@ geneBinHeatmap <- function(se, gene,
 #' gene-ambiguous (i.e. overlap multiple genes).
 #'
 #' @return A ggplot object
+#' @importFrom matrixStats colMedians
+#' @importFrom dplyr bind_rows
 #' @export
 #' @import ggplot2
 #'

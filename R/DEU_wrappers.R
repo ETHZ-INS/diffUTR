@@ -114,7 +114,7 @@ diffSplice.wrapper <- function(se, design, coef=NULL, robust=TRUE, improved=TRUE
   se
 }
 
-
+#' @param ... Further arguments (passed to `testForDEU` and `estimateExonFoldChanges`)
 #' @importFrom DEXSeq DEXSeqDataSet estimateSizeFactors estimateDispersions
 #' @importFrom DEXSeq estimateExonFoldChanges DEXSeqResults perGeneQValue testForDEU
 #' @export

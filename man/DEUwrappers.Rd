@@ -62,6 +62,8 @@ usage, use `excludeTypes=c("CDS","non-coding")` (or see
 original \code{\link[limma]{diffSplice}} (default TRUE).´}
 
 \item{reducedModel}{A reduced formula (applicable only to `DEXSeq.wrapper`).}
+
+\item{...}{Further arguments (passed to `testForDEU` and `estimateExonFoldChanges`)}
 }
 \value{
 The `se` object with additional rowData columns contain bin (i.e.
