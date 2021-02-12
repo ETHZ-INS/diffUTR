@@ -63,6 +63,7 @@ simes.aggregation <- function(p.value, geneid){
 #' @import S4Vectors
 #' @importFrom stats weighted.mean
 #' @examples
+#' library(SummarizedExperiment)
 #' data(example_bin_se)
 #' se <- diffSplice.wrapper(example_bin_se, ~condition)
 #' se <- geneLevelStats(se, includeTypes="3UTR")

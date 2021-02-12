@@ -33,6 +33,7 @@ If `returnSE=TRUE` (default), returns the `se` object with an updated
 Aggregates bin-level statistics to the gene-level
 }
 \examples{
+library(SummarizedExperiment)
 data(example_bin_se)
 se <- diffSplice.wrapper(example_bin_se, ~condition)
 se <- geneLevelStats(se, includeTypes="3UTR")
