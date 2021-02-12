@@ -11,7 +11,7 @@ output:
 abstract: |
   Showcases the use of the diffUTR package for streamlining analyses of differential exon usage and differential 3' UTR usage.
 vignette: |
-  %\VignetteIndexEntry{diffUTR}
+  %\VignetteIndexEntry{1_diffUTR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
