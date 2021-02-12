@@ -7,9 +7,9 @@
 plotTopGenes(se, n = 25, FDR = 0.05, diffUTR = FALSE, alpha = NULL)
 }
 \arguments{
-\item{se}{A bin-wise SummarizedExperiment as produced by 
-\code{\link{countFeatures}} and including bin-level tests (i.e. having been 
-passed through one of the DEU wrappers such as 
+\item{se}{A bin-wise SummarizedExperiment as produced by
+\code{\link{countFeatures}} and including bin-level tests (i.e. having been
+passed through one of the DEU wrappers such as
 \code{\link{diffSplice.wrapper}} or \code{\link{DEXSeq.wrapper}})}
 
 \item{n}{The maximum number of genes for which to plot labels}
@@ -17,8 +17,8 @@ passed through one of the DEU wrappers such as
 \item{FDR}{The FDR threshold above which to plot labels}
 
 \item{diffUTR}{Logical; if FALSE, uses absolute coefficients (appropriate for
-normal differential exon usage); if TRUE, uses non-absolute (i.e. changes 
-should be in the same direction across significant bins) and width-weighted 
+normal differential exon usage); if TRUE, uses non-absolute (i.e. changes
+should be in the same direction across significant bins) and width-weighted
 scores (i.e. larger bins have more weight) -- this is relevant only when
 testing UTR usage.}
 

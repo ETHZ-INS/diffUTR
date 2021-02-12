@@ -15,6 +15,8 @@
 #' gene level tests. Results are sorted by geneid and by exonid within gene.
 #' @export
 #' @import limma
+#' @importFrom methods new
+#' @importFrom stats ave pf pt terms
 diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
   #Exon Level squeeze, exon.s2.post t-test and weighting, sum of exon.df as gene.df after squeeze
   exon.genes <- fit$genes

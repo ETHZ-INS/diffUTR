@@ -18,39 +18,39 @@ simes.aggregation <- function(p.value, geneid){
   o <- order(geneid)
   geneid <- geneid[o]
   p.value <- p.value[o]
-  
+
   ngenes <- length(unique(geneid))
-  
+
   gene.nexons <- rowsum(rep(1,length(p.value)), geneid, reorder=FALSE)
   g <- rep(seq_len(ngenes), times=gene.nexons)
-  
+
   gene.lastexon <- cumsum(gene.nexons)
   gene.firstexon <- gene.lastexon-gene.nexons+1
-  
+
   penalty <- rep_len(1L,length(g))
   names(p.value)<-geneid
   penalty[gene.lastexon] <- 1L-gene.nexons
   penalty <- cumsum(penalty)[-gene.lastexon]
   penalty <- penalty / rep(gene.nexons-1L,gene.nexons-1L)
   g2 <- g[-gene.lastexon]
-  
+
   gene.simes.p.value <- rep(1, length(gene.nexons))
-  
+
   o <- order(g,p.value)
   p.adj <- pmin(p.value[o][-gene.lastexon] / penalty, 1)
   o <- order(g2,p.adj)
   gene.simes.p.value <- p.adj[o][gene.firstexon-0L:(ngenes-1L)]
-  
+
   gene.simes.p.value
 }
 
 #' geneLevelStats
-#' 
+#'
 #' Aggregates bin-level statistics to the gene-level
 #'
-#' @param se A `RangedSummarizedExperiment` containing the results of one of the 
+#' @param se A `RangedSummarizedExperiment` containing the results of one of the
 #' DEU wrappers.
-#' @param coef The coefficients tested (if the model included more than one 
+#' @param coef The coefficients tested (if the model included more than one
 #' term).
 #' @param excludeTypes Vector of bin types to exclude.
 #' @param includeTypes Vector of bin types to include (overrides `excludeTypes`)
@@ -61,12 +61,13 @@ simes.aggregation <- function(p.value, geneid){
 #' @export
 #'
 #' @import S4Vectors
+#' @importFrom stats weighted.mean
 #' @examples
 #' data(example_bin_se)
 #' se <- diffSplice.wrapper(example_bin_se, ~condition)
 #' se <- geneLevelStats(se, includeTypes="3UTR")
 #' head(metadata(se)$geneLevel)
-geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL, 
+geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL,
                            returnSE=TRUE){
   rd <- rowData(se)
   if(!is.null(includeTypes)){
@@ -77,18 +78,18 @@ geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL,
   }
   if(is.null(coef))
     coef <- colnames(rd)[grep("bin.p.value",colnames(rd))-1]
-  
-  metadata(se)$geneLevel <- .geneLevelStats(DataFrame( 
+
+  metadata(se)$geneLevel <- .geneLevelStats(DataFrame(
     bin.pval=rd$bin.p.value, coef=rd[[coef]], width=width(se),
     gene=rd$gene, gene_name=rd$gene_name, meanLogDensity=rd$meanLogDensity))
-  
+
   if(!returnSE) return(metadata(se)$geneLevel)
   se
 }
 
 #' @importFrom methods is as
 .geneLevelStats <- function(d, gene.qval=NULL){
-  stopifnot(c("bin.pval","coef","gene","width","meanLogDensity") %in% 
+  stopifnot(c("bin.pval","coef","gene","width","meanLogDensity") %in%
               colnames(d))
   if(is.null(gene.qval)) gene.qval <- simes.aggregation(d$bin.pval, d$gene)
   si <- split(seq_len(nrow(d)), d$gene)

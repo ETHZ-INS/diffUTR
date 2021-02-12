@@ -22,7 +22,6 @@ diffSplice.wrapper(
   design,
   coef = NULL,
   robust = TRUE,
-  filter = TRUE,
   improved = TRUE,
   countFilter = TRUE,
   excludeTypes = NULL
@@ -37,10 +36,10 @@ DEXSeq.wrapper(
 )
 }
 \arguments{
-\item{se}{A bin-wise SummarizedExperiment as produced by 
+\item{se}{A bin-wise SummarizedExperiment as produced by
 \code{\link{countFeatures}}}
 
-\item{design}{A formula (using columns of `colData(se)`) or (for 
+\item{design}{A formula (using columns of `colData(se)`) or (for
 `diffSplice.wrapper` or `diffSpliceDGE.wrapper` only) a model.matrix.}
 
 \item{coef}{The coefficient to be tested (ignored for `DEXSeq.wrapper`).}
@@ -55,22 +54,26 @@ DEXSeq.wrapper(
 `DEXSeq.wrapper`).}
 
 \item{excludeTypes}{A vector of bin types to ignore for testing. To test for
-any kind of differential usage, leave empty. To test for differential UTR 
-usage, use `excludeTypes=c("CDS","non-coding")` (or see 
+any kind of differential usage, leave empty. To test for differential UTR
+usage, use `excludeTypes=c("CDS","non-coding")` (or see
 \code{\link{geneLevelStats}} for more options).}
+
+\item{improved}{Logical; whether to use \code{\link{diffSplice2}} instead of the
+original \code{\link[limma]{diffSplice}} (default TRUE).´}
 
 \item{reducedModel}{A reduced formula (applicable only to `DEXSeq.wrapper`).}
 }
 \value{
-The `se` object with additional rowData columns contain bin (i.e. 
+The `se` object with additional rowData columns contain bin (i.e.
 exon) -level statistics, and a metadata slot containing gene level p-values.
 }
 \description{
-Wrappers around commonly-used DEU methods 
-(\code{\link[edgeR]{diffSpliceDGE}}, \code{\link[DEXSeq]{DEXSeq}} and an 
+Wrappers around commonly-used DEU methods
+(\code{\link[edgeR]{diffSpliceDGE}}, \code{\link[DEXSeq]{DEXSeq}} and an
 improved version of \code{\link[limma]{diffSplice}}
 }
 \examples{
+library(SummarizedExperiment)
 data(example_bin_se)
 se <- diffSplice.wrapper(example_bin_se, ~condition)
 head(rowData(se))

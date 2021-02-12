@@ -5,9 +5,9 @@
 #' @param what Type of values (i.e. assay) to plot
 #' @param anno_rows Row annotation columns (i.e. columns of `rowData(se)`) to plot
 #' @param anno_colors Annotation colors (passed to `SEtools::sechm`)
-#' @param removeAmbiguous Logical; whether to remove bins that are 
+#' @param removeAmbiguous Logical; whether to remove bins that are
 #' gene-ambiguous (i.e. overlap multiple genes).
-#' @param merge_legends Logical; whether to merge legends. This effectively 
+#' @param merge_legends Logical; whether to merge legends. This effectively
 #' calls `draw(..., merge_legends=TRUE)` around the heatmap.
 #' @param ... Passed to `sechm` (see \code{\link[SEtools]{SE-heatmap}}).
 #'
@@ -21,28 +21,28 @@
 #' data(example_bin_se)
 #' se <- diffSplice.wrapper(example_bin_se, ~condition)
 #' geneBinHeatmap(se, "Jund")
-geneBinHeatmap <- function(se, gene, 
+geneBinHeatmap <- function(se, gene,
                            what=c("logNormDensity", "logCPM", "scaledLogCPM"),
                            anno_rows=c("type","logWidth","meanLogDensity",
-                                       "log10PValue","geneAmbiguous"), 
-                           anno_colors=list(), removeAmbiguous=FALSE, 
+                                       "log10PValue","geneAmbiguous"),
+                           anno_colors=list(), removeAmbiguous=FALSE,
                            merge_legends=TRUE, ...){
   se <- .checkSE(se, checkNorm=TRUE)
   if(length(w <- .matchGene(se, gene))==0) stop("Gene not found!")
   se <- sort(se[w,])
   if(removeAmbiguous) se <- se[!rowData(se)$geneAmbiguous,]
   what <- match.arg(what)
-  if("log10PValue" %in% anno_rows && 
+  if("log10PValue" %in% anno_rows &&
      !("log10PValue" %in% colnames(rowData(se))))
     rowData(se)[["log10PValue"]] <- -log10(rowData(se)$bin.p.value)
   if("type" %in% anno_rows && is.null(anno_colors$type))
     anno_colors$type <- .typeColors()
   if(removeAmbiguous | !any(rowData(se)$geneAmbiguous))
     anno_rows <- setdiff(anno_rows, "geneAmbiguous")
-  h <- sechm(se, row.names(se), do.scale=what=="scaledLogCPM", 
-             show_rownames=FALSE, sortRowsOn=NULL, cluster_rows=FALSE, 
-             row_title=paste(gene, "bins"), anno_rows=anno_rows, 
-             assayName=ifelse(what=="logNormDensity",what,"logcpm"), 
+  h <- sechm(se, row.names(se), do.scale=what=="scaledLogCPM",
+             show_rownames=FALSE, sortRowsOn=NULL, cluster_rows=FALSE,
+             row_title=paste(gene, "bins"), anno_rows=anno_rows,
+             assayName=ifelse(what=="logNormDensity",what,"logcpm"),
              anno_colors=anno_colors, ...)
   if(merge_legends) return(draw(h, merge_legends=TRUE))
   h
@@ -67,7 +67,8 @@ geneBinHeatmap <- function(se, gene,
 #' @param colour rowData variable to use to determine the colour of the bins.
 #' If `type="condition"`, can also be "condition"; if `type="sample"` can be
 #' any colData column.
-#' @param removeAmbiguous Logical; whether to remove bins that are 
+#' @param alpha Alpha level, passed to ggplot.
+#' @param removeAmbiguous Logical; whether to remove bins that are
 #' gene-ambiguous (i.e. overlap multiple genes).
 #'
 #' @return A ggplot object
@@ -78,9 +79,9 @@ geneBinHeatmap <- function(se, gene,
 #' data(example_bin_se)
 #' se <- diffSplice.wrapper(example_bin_se, ~condition)
 #' deuBinPlot(se, "Jund")
-deuBinPlot <- function(se, gene, type=c("summary","condition","sample"), 
-                       intronSize=2, exonSize=c("sqrt","linear","log"), y=NULL, 
-                       condition=NULL, size="type", lineSize=1, 
+deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
+                       intronSize=2, exonSize=c("sqrt","linear","log"), y=NULL,
+                       condition=NULL, size="type", lineSize=1,
                        colour=NULL, alpha=NULL, removeAmbiguous=TRUE ){
   se <- .checkSE(se)
   type <- match.arg(type)
@@ -119,26 +120,26 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
       }
     }
   }
-  
+
   se <- sort(se[w,])
   if(removeAmbiguous) se <- se[!rowData(se)$geneAmbiguous,]
   de <- rowData(se)
   if(y=="geneNormDensity" && !("geneNormDensity" %in% assayNames(se))){
-    si <- vapply(split(seq_len(ncol(se)), se[[condition]]), 
+    si <- vapply(split(seq_len(ncol(se)), se[[condition]]),
                  FUN.VALUE=numeric(1), FUN=function(i){
                    mean(matrixStats::colMedians(assays(se)$logNormDensity[,i]))
                  })
-    assays(se)$geneNormDensity <- 
+    assays(se)$geneNormDensity <-
       t(t(assays(se)$logNormDensity)-si[se[[condition]]])
   }
-  
+
   if(size=="type"){
     levels(de$type)[grepl("CDS/.*UTR", levels(de$type))] <- "CDS/UTR"
     levels(de$type)[grep("CDS/.*UTR", levels(de$type))] <- "CDS/UTR"
     levels(de$type)[grep("CDS|non-coding", levels(de$type), invert=TRUE)] <- "UTR"
     de$type <- factor(de$type, c("non-coding","UTR","CDS/UTR","CDS"))
   }
-  
+
   gr <- ranges(se)
   de$log10PValue <- -log10(de$bin.p.value)
   de$order <- seq_len(nrow(de))
@@ -155,7 +156,7 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
   if(type=="summary"){
     if(lineSize>0){
       d2 <- getd2(de)
-      p <- p + geom_segment(data=d2, 
+      p <- p + geom_segment(data=d2,
                             aes(x=x_start, xend=x_end, y=y_start, yend=y_end,
                                 linetype=type),
                             colour="grey", size=lineSize, alpha=alpha)
@@ -202,25 +203,25 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
                  paste0(exonSize,"-scaled genomic location"))
   p + scale_linetype_manual(values=c("TRUE"="dotted", "FALSE"="solid"), guide=FALSE) +
     geom_segment(data=as.data.frame(de), alpha=alpha,
-                 aes_string(x="x_start", xend="x_end", y=y, yend=y, size=size, 
+                 aes_string(x="x_start", xend="x_end", y=y, yend=y, size=size,
                             colour=colour)) +
     theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
-    ggtitle(gene) + xlab(xlab) + 
+    ggtitle(gene) + xlab(xlab) +
     ylab(ifelse(y=="geneNormDensity","Gene-normalized logDensity",y))
 }
 
 
 #' plotTopGenes
 #'
-#' @param se A bin-wise SummarizedExperiment as produced by 
-#' \code{\link{countFeatures}} and including bin-level tests (i.e. having been 
-#' passed through one of the DEU wrappers such as 
+#' @param se A bin-wise SummarizedExperiment as produced by
+#' \code{\link{countFeatures}} and including bin-level tests (i.e. having been
+#' passed through one of the DEU wrappers such as
 #' \code{\link{diffSplice.wrapper}} or \code{\link{DEXSeq.wrapper}})
 #' @param n The maximum number of genes for which to plot labels
 #' @param FDR The FDR threshold above which to plot labels
 #' @param diffUTR Logical; if FALSE, uses absolute coefficients (appropriate for
-#' normal differential exon usage); if TRUE, uses non-absolute (i.e. changes 
-#' should be in the same direction across significant bins) and width-weighted 
+#' normal differential exon usage); if TRUE, uses non-absolute (i.e. changes
+#' should be in the same direction across significant bins) and width-weighted
 #' scores (i.e. larger bins have more weight) -- this is relevant only when
 #' testing UTR usage.
 #' @param alpha Points transparency
@@ -250,7 +251,7 @@ plotTopGenes <- function(se, n=25, FDR=0.05, diffUTR=FALSE, alpha=NULL){
   }
   if(diffUTR){
     if(is.null(alpha)) alpha <- 1
-    p <- ggplot(se, aes(sizeScore, -log10(q.value))) + 
+    p <- ggplot(se, aes(sizeScore, -log10(q.value))) +
       geom_point(aes(colour=w.coef, size=geneMeanDensity), alpha=alpha) +
       scale_colour_gradient2() + xlab("Weighted size score")
     de <- se[se$q.value<FDR,,drop=FALSE]
@@ -258,13 +259,13 @@ plotTopGenes <- function(se, n=25, FDR=0.05, diffUTR=FALSE, alpha=NULL){
   }else{
     se$tmp <- -log10(se$q.value)*se$w.abs.coef
     if(is.null(alpha)){
-      p <- ggplot(se, aes(w.abs.coef, -log10(q.value))) + 
-        geom_point(aes(colour=density.ratio, size=geneMeanDensity, 
+      p <- ggplot(se, aes(w.abs.coef, -log10(q.value))) +
+        geom_point(aes(colour=density.ratio, size=geneMeanDensity,
                        alpha=abs(tmp))) + scale_alpha(guide=FALSE)
-      
+
     }else{
-      p <- ggplot(se, aes(w.abs.coef, -log10(q.value))) + 
-        geom_point(aes(colour=density.ratio, size=geneMeanDensity), 
+      p <- ggplot(se, aes(w.abs.coef, -log10(q.value))) +
+        geom_point(aes(colour=density.ratio, size=geneMeanDensity),
                    alpha=alpha)
     }
     p <- p + xlab("Weighted absolute coefficient")

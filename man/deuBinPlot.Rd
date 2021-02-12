@@ -47,7 +47,9 @@ the mean exon size. If >3, each intron will have the given size.}
 If `type="condition"`, can also be "condition"; if `type="sample"` can be
 any colData column.}
 
-\item{removeAmbiguous}{Logical; whether to remove bins that are 
+\item{alpha}{Alpha level, passed to ggplot.}
+
+\item{removeAmbiguous}{Logical; whether to remove bins that are
 gene-ambiguous (i.e. overlap multiple genes).}
 }
 \value{

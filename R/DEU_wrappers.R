@@ -1,12 +1,12 @@
 #' DEUwrappers
 #'
-#' Wrappers around commonly-used DEU methods 
-#' (\code{\link[edgeR]{diffSpliceDGE}}, \code{\link[DEXSeq]{DEXSeq}} and an 
+#' Wrappers around commonly-used DEU methods
+#' (\code{\link[edgeR]{diffSpliceDGE}}, \code{\link[DEXSeq]{DEXSeq}} and an
 #' improved version of \code{\link[limma]{diffSplice}}
 #'
-#' @param se A bin-wise SummarizedExperiment as produced by 
+#' @param se A bin-wise SummarizedExperiment as produced by
 #' \code{\link{countFeatures}}
-#' @param design A formula (using columns of `colData(se)`) or (for 
+#' @param design A formula (using columns of `colData(se)`) or (for
 #' `diffSplice.wrapper` or `diffSpliceDGE.wrapper` only) a model.matrix.
 #' @param reducedModel A reduced formula (applicable only to `DEXSeq.wrapper`).
 #' @param coef The coefficient to be tested (ignored for `DEXSeq.wrapper`).
@@ -17,18 +17,20 @@
 #' @param countFilter Logical; whether to filter out low-count bins (ignored for
 #' `DEXSeq.wrapper`).
 #' @param excludeTypes A vector of bin types to ignore for testing. To test for
-#'  any kind of differential usage, leave empty. To test for differential UTR 
-#'  usage, use `excludeTypes=c("CDS","non-coding")` (or see 
+#'  any kind of differential usage, leave empty. To test for differential UTR
+#'  usage, use `excludeTypes=c("CDS","non-coding")` (or see
 #'  \code{\link{geneLevelStats}} for more options).
 #'
-#' @return The `se` object with additional rowData columns contain bin (i.e. 
+#' @return The `se` object with additional rowData columns contain bin (i.e.
 #' exon) -level statistics, and a metadata slot containing gene level p-values.
 #'
 #' @importFrom edgeR DGEList calcNormFactors glmQLFit glmFit diffSpliceDGE filterByExpr estimateDisp
+#' @importFrom stats p.adjust setNames
 #' @aliases DEUwrappers
 #' @export
 #' @rdname DEUwrappers
-#' @examples 
+#' @examples
+#' library(SummarizedExperiment)
 #' data(example_bin_se)
 #' se <- diffSplice.wrapper(example_bin_se, ~condition)
 #' head(rowData(se))
@@ -59,8 +61,8 @@ diffSpliceDGE.wrapper <- function(se, design, coef=NULL, QLF=TRUE, robust=TRUE,
   ep <- res$exon.p.value
   if(!is.null(excludeTypes)) ep[rowData(se)$type %in% excludeTypes] <- 1
   rowData(se)$bin.FDR <- p.adjust(ep)
-  
-  d <- DataFrame(bin.pval=ep,coef=rowData(se)$coefficient,gene=rowData(se)$gene, 
+
+  d <- DataFrame(bin.pval=ep,coef=rowData(se)$coefficient,gene=rowData(se)$gene,
                  width=width(se), meanLogDensity=rowData(se)$meanLogDensity)
   if("gene_name" %in% colnames(rowData(se)))
     d$gene_name <- rowData(se)$gene_name
@@ -68,12 +70,14 @@ diffSpliceDGE.wrapper <- function(se, design, coef=NULL, QLF=TRUE, robust=TRUE,
   se
 }
 
+#' @param improved Logical; whether to use \code{\link{diffSplice2}} instead of the
+#' original \code{\link[limma]{diffSplice}} (default TRUE).´
 #' @importFrom stats model.matrix
 #' @importFrom limma lmFit voom diffSplice
 #' @importFrom edgeR DGEList calcNormFactors filterByExpr
 #' @export
 #' @rdname DEUwrappers
-diffSplice.wrapper <- function(se, design, coef=NULL, robust=TRUE, filter=TRUE, improved=TRUE,
+diffSplice.wrapper <- function(se, design, coef=NULL, robust=TRUE, improved=TRUE,
                                countFilter=TRUE, excludeTypes=NULL){
   se <- .checkSE(se)
   if(is(design, "formula"))
@@ -102,7 +106,7 @@ diffSplice.wrapper <- function(se, design, coef=NULL, robust=TRUE, filter=TRUE, 
   rowData(se)$bin.FDR <- p.adjust(ep)
 
   if(!is.null(excludeTypes)) ep[rowData(se)$type %in% excludeTypes] <- 1
-  d <- DataFrame(bin.pval=ep, coef=res$coefficients[,coef], gene=rowData(se)$gene, 
+  d <- DataFrame(bin.pval=ep, coef=res$coefficients[,coef], gene=rowData(se)$gene,
                  width=width(se), meanLogDensity=rowData(se)$meanLogDensity)
   if("gene_name" %in% colnames(rowData(se)))
     d$gene_name <- rowData(se)$gene_name
@@ -111,7 +115,7 @@ diffSplice.wrapper <- function(se, design, coef=NULL, robust=TRUE, filter=TRUE, 
 }
 
 
-#' @importFrom DEXSeq DEXSeqDataSet estimateSizeFactors estimateDispersions 
+#' @importFrom DEXSeq DEXSeqDataSet estimateSizeFactors estimateDispersions
 #' @importFrom DEXSeq estimateExonFoldChanges DEXSeqResults perGeneQValue testForDEU
 #' @export
 #' @rdname DEUwrappers
@@ -142,8 +146,8 @@ DEXSeq.wrapper <- function(se, design=~sample+exon+condition:exon,
 
   if(!is.null(excludeTypes)) res$pvalue[rowData(se)$type %in% excludeTypes] <- 1
   rowData(se)$bin.FDR <- p.adjust(res$pvalue)
-  
-  d <- DataFrame(bin.pval=res$pvalue, coef=rowData(se)$log2fc, gene=rowData(se)$gene, 
+
+  d <- DataFrame(bin.pval=res$pvalue, coef=rowData(se)$log2fc, gene=rowData(se)$gene,
                  width=width(se), meanLogDensity=rowData(se)$meanLogDensity)
   if("gene_name" %in% colnames(rowData(se)))
     d$gene_name <- rowData(se)$gene_name

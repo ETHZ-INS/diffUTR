@@ -26,10 +26,10 @@ geneBinHeatmap(
 
 \item{anno_colors}{Annotation colors (passed to `SEtools::sechm`)}
 
-\item{removeAmbiguous}{Logical; whether to remove bins that are 
+\item{removeAmbiguous}{Logical; whether to remove bins that are
 gene-ambiguous (i.e. overlap multiple genes).}
 
-\item{merge_legends}{Logical; whether to merge legends. This effectively 
+\item{merge_legends}{Logical; whether to merge legends. This effectively
 calls `draw(..., merge_legends=TRUE)` around the heatmap.}
 
 \item{...}{Passed to `sechm` (see \code{\link[SEtools]{SE-heatmap}}).}

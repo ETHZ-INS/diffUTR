@@ -13,10 +13,10 @@ geneLevelStats(
 )
 }
 \arguments{
-\item{se}{A `RangedSummarizedExperiment` containing the results of one of the 
+\item{se}{A `RangedSummarizedExperiment` containing the results of one of the
 DEU wrappers.}
 
-\item{coef}{The coefficients tested (if the model included more than one 
+\item{coef}{The coefficients tested (if the model included more than one
 term).}
 
 \item{excludeTypes}{Vector of bin types to exclude.}
