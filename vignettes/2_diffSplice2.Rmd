@@ -28,7 +28,7 @@ Here we describe the improvements to `r BiocStyle::Biocpkg("limma")`'s `diffSpli
 where $w_{i}=\frac{1}{u_{i}^2}$ and $u_{i}$ refers to the diagonal elements of the unscaled covariance matrix $(X^TVX)^{-1}$. $X$ is the design matrix and $V$ corresponds to the weight matrix estimated by `voom`. The difference of log2 fold changes, which is also the coefficient returned by `diffSplice()` is then calculated by $\hat{C}_{k} = \hat{\beta}_{k} - \hat{B}_{k}$. Instead of calculating the t-statistic with $\hat{C}_{k}$, this value is scaled again in the original code:
 
 \begin{equation}
-    \hat{D}_{k} =\hat{C}_{k}\sqrt{1-\frac{{w}_{i}}{\sum_{i}^{N}w_{i}}}
+    \hat{D}_{k} =\hat{C}_{k}\sqrt{1-\frac{{w}_{k}}{\sum_{i}^{N}w_{i}}}
 \end{equation}
 
 and the _t_-statistic is calculated as:
