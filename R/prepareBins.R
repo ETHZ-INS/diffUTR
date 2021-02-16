@@ -210,6 +210,7 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   apa
 }
 
+#' @importFrom IRanges IRanges
 .extendWithAPA <- function(g, APA, maxUTRbinSize=15000){
   # get regions which could be boundrys for bins
   gtf1<-g[g$type %in% c("gene", "exon"),]
