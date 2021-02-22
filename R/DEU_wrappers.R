@@ -26,6 +26,7 @@
 #'
 #' @importFrom edgeR DGEList calcNormFactors glmQLFit glmFit diffSpliceDGE filterByExpr estimateDisp
 #' @importFrom stats p.adjust setNames
+#' @importFrom matrixStats rowMins
 #' @aliases DEUwrappers
 #' @export
 #' @rdname DEUwrappers
