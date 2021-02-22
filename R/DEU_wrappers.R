@@ -55,10 +55,19 @@ diffSpliceDGE.wrapper <- function(se, design, coef=NULL, QLF=TRUE, robust=TRUE,
   se <- se[names(res$exon.p.value),]
   co <- res$coefficients
   if(!is.null(dim(co))) co <- co[,coef]
-  rowData(se)$coefficient <- co
-  rowData(se)$bin.p.value <- res$exon.p.value
+  if(length(coef)>1 && !is.null(dim(res$exon.p.value))){
+    rowData(se) <- cbind(rowData(se), co)
+    pv <- res$exon.p.value[,coef]
+    colnames(pv) <- paste0(colnames(pv),".p.value")
+    rowData(se)$coefficient <- mapply(i=seq_len(nrow(co)), j=apply(pv,1,which.min),
+                                      FUN=function(i,j) co[i,j])
+    rowData(se) <- cbind(rowData(se), pv)
+    rowData(se)$bin.p.value <- ep <- rowMins(pv)
+  }else{
+    rowData(se)$coefficient <- co
+    rowData(se)$bin.p.value <- ep <- res$exon.p.value
+  }
 
-  ep <- res$exon.p.value
   if(!is.null(excludeTypes)) ep[rowData(se)$type %in% excludeTypes] <- 1
   rowData(se)$bin.FDR <- p.adjust(ep)
 
@@ -99,14 +108,27 @@ diffSplice.wrapper <- function(se, design, coef=NULL, robust=TRUE, improved=TRUE
   }
 
   se <- se[row.names(res$p.value),]
-  ep <- res$p.value[,coef]
+  
   tmp <- rowData(se)[,setdiff(colnames(rowData(se)),
-                              c(colnames(res$coefficients),"bin.p.value"))]
-  rowData(se) <- cbind(tmp, res$coefficients, bin.p.value=ep)
+                              c(colnames(res$coefficients),"bin.p.value","coefficient"))]
+  if(length(coef)>1){
+    co <- res$coefficients[,coef]
+    pv <- res$p.value[,coef]
+    colnames(pv) <- paste0(colnames(pv),"p.value")
+    tmp$coefficient <- mapply(i=seq_len(nrow(co)), j=apply(pv,1,which.min),
+                                      FUN=function(i,j) co[i,j])
+    tmp <- cbind(tmp, co, pv)
+    ep <- rowMins(pv)
+  }else{
+    tmp$coefficient <- res$coefficients[,coef]
+    ep <- res$p.value[,coef]
+  }
+  tmp$bin.p.value <- ep
+  rowData(se) <- tmp
   rowData(se)$bin.FDR <- p.adjust(ep)
 
   if(!is.null(excludeTypes)) ep[rowData(se)$type %in% excludeTypes] <- 1
-  d <- DataFrame(bin.pval=ep, coef=res$coefficients[,coef], gene=rowData(se)$gene,
+  d <- DataFrame(bin.pval=ep, coef=rowData(se)$coefficient, gene=rowData(se)$gene,
                  width=width(se), meanLogDensity=rowData(se)$meanLogDensity)
   if("gene_name" %in% colnames(rowData(se)))
     d$gene_name <- rowData(se)$gene_name
