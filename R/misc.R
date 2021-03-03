@@ -1,10 +1,10 @@
 #' addNormalizedAssays
 #'
-#' @param se A bin-wise `SummarizedExperiment` as produced by 
+#' @param se A bin-wise `SummarizedExperiment` as produced by
 #' \code{\link{countFeatures}}
 #'
 #' @return The `se` object with populated `logcpm` and `logNormDensity` assays.
-#' @param readLength Used as a minimum width to estimate read density 
+#' @param readLength Used as a minimum width to estimate read density
 #' (default 50).
 #' @export
 #'
@@ -35,13 +35,15 @@ addNormalizedAssays <- function(se, readLength=50L){
 }
 
 
-# remove the longest common string at the beginning of all elements of a 
+# remove the longest common string at the beginning of all elements of a
 # character vector
 rmLCS <- function(x, delim=""){
-  tmp <- strsplit(x,delim,fixed=TRUE)
+  tmp <- strsplit(as.character(x),delim,fixed=TRUE)
   if(any(lengths(tmp)==1)) return(x)
   i <- 1
-  while(length(unique(sapply(tmp,FUN=function(x) x[i])))==1) i <- i+1
+  while(length(unique(vapply(tmp,FUN.VALUE=character(1), FUN=function(x) x[i])))==1){
+    i <- i+1
+  }
   if(i==1) return(x)
   vapply(tmp, FUN.VALUE=character(1), FUN=function(x){
     x <- x[!is.null(x)]
@@ -50,19 +52,19 @@ rmLCS <- function(x, delim=""){
 }
 
 .typeColors <- function(){
-  c("3UTR"="#117733", "CDS"="#332288", "CDS/3UTR"="#44AA99", 
-    "CDS/UTR"="#44AA99", "CDS/UTR/3UTR"="#44AA99", "UTR"="#DDCC77", 
+  c("3UTR"="#117733", "CDS"="#332288", "CDS/3UTR"="#44AA99",
+    "CDS/UTR"="#44AA99", "CDS/UTR/3UTR"="#44AA99", "UTR"="#DDCC77",
     "UTR/3UTR"="#999933", "non-coding"="#CC6677")
 }
 
 #' @importFrom methods is
 .checkSE <- function(se, checkNorm=FALSE, requireStats=FALSE){
   stopifnot(is(se,"RangedSummarizedExperiment"))
-  stopifnot(all(c("type","meanLogCPM","logWidth","meanLogDensity","gene") %in% 
+  stopifnot(all(c("type","meanLogCPM","logWidth","meanLogDensity","gene") %in%
                   colnames(rowData(se))))
   if(requireStats){
     if( !all(c("bin.p.value","bin.FDR") %in% colnames(rowData(se))) ||
-        is.null(gl <- metadata(se)$geneLevel) || 
+        is.null(gl <- metadata(se)$geneLevel) ||
         !(is.data.frame(gl) || is(gl, "DFrame")))
       stop("The object does not contain differential bin usage statistics. ",
            "You should run one of the DEU wrappers first (see `?DEUwrappers`).")
