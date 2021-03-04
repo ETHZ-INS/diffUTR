@@ -1,0 +1,8 @@
+Changes in version 0.99.13 (2021-03-04)
++ fixed misnamed variable bug when creating annotation from ensembldb
++ formatting and renaming changes to conform with Bioc standards
+
+Changes in version 0.99.10 (2021-02-05)
++ submitted to BioConductor
++ improvement on limma::diffSplice
++ differential 3' UTR usage
