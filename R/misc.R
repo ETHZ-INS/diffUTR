@@ -68,7 +68,7 @@ rmLCS <- function(x, delim=""){
         is.null(gl <- metadata(se)$geneLevel) ||
         !(is.data.frame(gl) || is(gl, "DFrame")))
       stop("The object does not contain differential bin usage statistics. ",
-           "You should run one of the DEU wrappers first (see `?DEUwrappers`).")
+           "You should run a DEU wrapper first (see `?DEUwrappers`).")
   }
   if(checkNorm){
     if(!all(c("logcpm","logNormDensity") %in% assayNames(se))){

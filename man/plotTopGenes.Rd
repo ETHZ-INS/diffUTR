@@ -16,8 +16,8 @@ passed through one of the DEU wrappers such as
 
 \item{FDR}{The FDR threshold above which to plot labels}
 
-\item{diffUTR}{Logical; if FALSE, uses absolute coefficients (appropriate for
-normal differential exon usage); if TRUE, uses non-absolute (i.e. changes
+\item{diffUTR}{Logical; if FALSE, uses absolute coefficients (appropriate
+for normal differential exon usage); if TRUE, uses non-absolute (ie changes
 should be in the same direction across significant bins) and width-weighted
 scores (i.e. larger bins have more weight) -- this is relevant only when
 testing UTR usage.}

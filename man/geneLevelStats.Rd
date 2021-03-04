@@ -13,21 +13,24 @@ geneLevelStats(
 )
 }
 \arguments{
-\item{se}{A `RangedSummarizedExperiment` containing the results of one of the
-DEU wrappers.}
+\item{se}{A `RangedSummarizedExperiment` containing the results of one of
+the DEU wrappers.}
 
 \item{coef}{The coefficients tested (if the model included more than one
 term).}
 
 \item{excludeTypes}{Vector of bin types to exclude.}
 
-\item{includeTypes}{Vector of bin types to include (overrides `excludeTypes`)}
+\item{includeTypes}{Vector of bin types to include (overrides
+`excludeTypes`)}
 
-\item{returnSE}{Logical; whether to return the updated `se` object (default),}
+\item{returnSE}{Logical; whether to return the updated `se` object
+(default), or the gene-level table.}
 }
 \value{
-If `returnSE=TRUE` (default), returns the `se` object with an updated
-`metadata(se)$geneLevel` slot, otherwise returns the gene-level data.frame.
+If `returnSE=TRUE` (default), returns the `se` object with an
+updated `metadata(se)$geneLevel` slot, otherwise returns the gene-level
+data.frame.
 }
 \description{
 Aggregates bin-level statistics to the gene-level

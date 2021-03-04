@@ -7,25 +7,27 @@
 diffSplice2(fit, geneid, exonid = NULL, robust = FALSE, verbose = TRUE)
 }
 \arguments{
-\item{fit}{an \code{\link[limma]{MArrayLM-class}} fitted model object produced by
-\code{\link[limma]{lmFit}} or `contrasts.fit`, with rows corresponding to exons.}
+\item{fit}{an \code{\link[limma]{MArrayLM-class}} fitted model object
+produced by \code{\link[limma]{lmFit}} or `contrasts.fit`, with rows
+corresponding to exons.}
 
 \item{geneid}{gene identifiers (as in \code{\link[limma]{diffSplice}})}
 
 \item{exonid}{exon identifiers (as in \code{\link[limma]{diffSplice}})}
 
-\item{robust}{logical, should the estimation of the empirical Bayes prior parameters
-be robustified against outlier sample variances?}
+\item{robust}{logical, should the estimation of the empirical Bayes prior
+parameters be robustified against outlier sample variances?}
 
 \item{verbose}{logical, if TRUE will output some diagnostic information}
 }
 \value{
-An \code{\link[limma]{MArrayLM-class}} objectcontaining both exon level and
-gene level tests. Results are sorted by geneid and by exonid within gene.
+An \code{\link[limma]{MArrayLM-class}} objectcontaining both exon
+level and gene level tests. Results are sorted by geneid and by exonid
+within gene.
 }
 \description{
-This is a small improvement to the \code{\link[limma]{diffSplice}} function written by
-Gordon Smyth and Charity Law.
+This is a small improvement to the \code{\link[limma]{diffSplice}} function
+written by Gordon Smyth and Charity Law.
 }
 \examples{
 library(SummarizedExperiment)

@@ -1,6 +1,7 @@
 #' simes.aggregation
 #'
-#' Simes p-value correction and aggregation, adapted from \code{link[limma]{diffSplice}}
+#' Simes p-value correction and aggregation, adapted from
+#' \code{link[limma]{diffSplice}}
 #'
 #' @param p.value A vector of p-values
 #' @param geneid A vector of group labels such as gene identifiers
@@ -48,16 +49,19 @@ simes.aggregation <- function(p.value, geneid){
 #'
 #' Aggregates bin-level statistics to the gene-level
 #'
-#' @param se A `RangedSummarizedExperiment` containing the results of one of the
-#' DEU wrappers.
+#' @param se A `RangedSummarizedExperiment` containing the results of one of
+#' the DEU wrappers.
 #' @param coef The coefficients tested (if the model included more than one
 #' term).
 #' @param excludeTypes Vector of bin types to exclude.
-#' @param includeTypes Vector of bin types to include (overrides `excludeTypes`)
-#' @param returnSE Logical; whether to return the updated `se` object (default),
+#' @param includeTypes Vector of bin types to include (overrides
+#' `excludeTypes`)
+#' @param returnSE Logical; whether to return the updated `se` object
+#' (default), or the gene-level table.
 #'
-#' @return If `returnSE=TRUE` (default), returns the `se` object with an updated
-#' `metadata(se)$geneLevel` slot, otherwise returns the gene-level data.frame.
+#' @return If `returnSE=TRUE` (default), returns the `se` object with an
+#' updated `metadata(se)$geneLevel` slot, otherwise returns the gene-level
+#' data.frame.
 #' @export
 #'
 #' @import S4Vectors

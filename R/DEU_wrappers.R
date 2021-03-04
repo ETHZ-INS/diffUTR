@@ -10,15 +10,15 @@
 #' `diffSpliceWrapper` or `diffSpliceDGEWrapper` only) a model.matrix.
 #' @param reducedModel A reduced formula (applicable only to `DEXSeqWrapper`).
 #' @param coef The coefficient to be tested (ignored for `DEXSeqWrapper`).
-#' @param QLF Logical; whether to use edgeR's quasi-likelihood negative binomial
-#' (applicable only to `diffSpliceDGEWrapper`).
-#' @param robust Logical; whether to use robust fitting for the dispersion trend
-#' (ignored for `DEXSeqWrapper`).
-#' @param countFilter Logical; whether to filter out low-count bins (ignored for
-#' `DEXSeqWrapper`).
-#' @param excludeTypes A vector of bin types to ignore for testing. To test for
-#'  any kind of differential usage, leave empty. To test for differential UTR
-#'  usage, use `excludeTypes=c("CDS","non-coding")` (or see
+#' @param QLF Logical; whether to use edgeR's quasi-likelihood negative
+#' binomial (applicable only to `diffSpliceDGEWrapper`).
+#' @param robust Logical; whether to use robust fitting for the dispersion
+#' trend (ignored for `DEXSeqWrapper`).
+#' @param countFilter Logical; whether to filter out low-count bins (ignored
+#' for `DEXSeqWrapper`).
+#' @param excludeTypes A vector of bin types to ignore for testing. To test
+#' for any kind of differential usage, leave empty. To test for differential
+#' UTR usage, use `excludeTypes=c("CDS","non-coding")` (or see
 #'  \code{\link{geneLevelStats}} for more options).
 #'
 #' @return The `se` object with additional rowData columns contain bin (i.e.
@@ -76,16 +76,17 @@ diffSpliceDGEWrapper <- function(se, design, coef=NULL, QLF=TRUE, robust=TRUE,
   if(!is.null(excludeTypes)) ep[rowData(se)$type %in% excludeTypes] <- 1
   rowData(se)$bin.FDR <- p.adjust(ep)
 
-  d <- DataFrame(bin.pval=ep,coef=rowData(se)$coefficient,gene=rowData(se)$gene,
-                 width=width(se), meanLogDensity=rowData(se)$meanLogDensity)
+  d <- DataFrame(bin.pval=ep, coef=rowData(se)$coefficient,
+                 gene=rowData(se)$gene, width=width(se),
+                 meanLogDensity=rowData(se)$meanLogDensity)
   if("gene_name" %in% colnames(rowData(se)))
     d$gene_name <- rowData(se)$gene_name
   metadata(se)$geneLevel <- .geneLevelStats(d=d)
   se
 }
 
-#' @param improved Logical; whether to use \code{\link{diffSplice2}} instead of
-#'  the original \code{\link[limma]{diffSplice}} (default TRUE).´
+#' @param improved Logical; whether to use \code{\link{diffSplice2}} instead
+#' of the original \code{\link[limma]{diffSplice}} (default TRUE).
 #' @importFrom stats model.matrix
 #' @importFrom limma lmFit voom diffSplice
 #' @importFrom edgeR DGEList calcNormFactors filterByExpr
@@ -156,9 +157,9 @@ diffSpliceWrapper <- function(se, design, coef=NULL, robust=TRUE,
 DEXSeqWrapper <- function(se, design=~sample+exon+condition:exon,
                            reducedModel=~sample+exon, excludeTypes=NULL, ...){
   if(!("exon" %in% labels(terms(design))))
-    stop("For DEXSeq, the formula should include the extra 'sample' and 'exon'",
-         " terms.\nFor instance, if you wanted to test for an effect of the ",
-         "variable 'condition' on bin usage, you would use:\n",
+    stop("For DEXSeq, the formula should include the extra 'sample' and ",
+         "'exon' terms.\nFor instance, if you wanted to test for an effect ",
+         "of the variable 'condition' on bin usage, you would use:\n",
          "~sample+exon+condition:exon")
   se <- .checkSE(se)
   e <- floor(as.matrix(assays(se)$counts))
@@ -178,7 +179,8 @@ DEXSeqWrapper <- function(se, design=~sample+exon+condition:exon,
   rowData(se)$exonBaseMean <- res$exonBaseMean
   rowData(se)$bin.p.value <- res$pvalue
 
-  if(!is.null(excludeTypes)) res$pvalue[rowData(se)$type %in% excludeTypes] <- 1
+  if(!is.null(excludeTypes))
+    res$pvalue[rowData(se)$type %in% excludeTypes] <- 1
   rowData(se)$bin.FDR <- p.adjust(res$pvalue)
 
   d <- DataFrame(bin.pval=res$pvalue, coef=rowData(se)$log2fc,
@@ -188,6 +190,5 @@ DEXSeqWrapper <- function(se, design=~sample+exon+condition:exon,
     d$gene_name <- rowData(se)$gene_name
   message("Generating gene-level stats...")
   metadata(se)$geneLevel <- .geneLevelStats(d=d, gene.qval=perGeneQValue(res))
-
   se
 }

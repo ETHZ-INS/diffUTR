@@ -7,7 +7,7 @@
 a `GRanges` object
 }
 \description{
-These are the sites from polyA_DB release 3.2, downloaded from 
-\url{https://exon.apps.wistar.org/PolyA_DB/v3/download/3.2/rat_pas.zip}, 
+These are the sites from polyA_DB release 3.2, downloaded from
+\url{https://exon.apps.wistar.org/PolyA_DB/v3/download/3.2/rat_pas.zip},
 and lifted over to Rno6.
 }

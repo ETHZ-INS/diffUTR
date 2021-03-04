@@ -30,8 +30,8 @@ passed through one of the DEU wrappers such as
 \item{type}{Either 'summary' (plot DEU summary), 'sample' (plot sample-wise
 data), or 'condition' (plot data aggregate by condition)}
 
-\item{intronSize}{Intron plot size. If <=3, intron size will be this fraction
-of the mean exon size. If >3, each intron will have the given size.}
+\item{intronSize}{Intron plot size. If <=3, intron size will be this
+fraction of the mean exon size. If >3, each intron will have the given size.}
 
 \item{exonSize}{Scaling for exon sizes, either 'sqrt', 'log', or 'linear'.}
 

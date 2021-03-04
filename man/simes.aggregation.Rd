@@ -15,7 +15,8 @@ simes.aggregation(p.value, geneid)
 A named vector of aggregated p-values
 }
 \description{
-Simes p-value correction and aggregation, adapted from \code{link[limma]{diffSplice}}
+Simes p-value correction and aggregation, adapted from
+\code{link[limma]{diffSplice}}
 }
 \examples{
 p <- runif(50)

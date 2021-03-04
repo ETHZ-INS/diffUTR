@@ -59,8 +59,8 @@ geneBinHeatmap <- function(se, gene,
 #' @param gene The gene of interest
 #' @param type Either 'summary' (plot DEU summary), 'sample' (plot sample-wise
 #' data), or 'condition' (plot data aggregate by condition)
-#' @param intronSize Intron plot size. If <=3, intron size will be this fraction
-#'  of the mean exon size. If >3, each intron will have the given size.
+#' @param intronSize Intron plot size. If <=3, intron size will be this
+#' fraction of the mean exon size. If >3, each intron will have the given size.
 #' @param exonSize Scaling for exon sizes, either 'sqrt', 'log', or 'linear'.
 #' @param y Value to plot on the y-axis. If `type="summary"`, this should be a
 #' column of `rowData(se)`, otherwise should be an assay name of `se`.
@@ -113,8 +113,8 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
   }
   if(is.null(y)){
     if(type=="summary"){
-      for(f in c("coefficient","coefficients","log2fc","logFC",
-            colnames(rowData(se))[grep("bin.p.value",colnames(rowData(se)))-1]))
+      ff <- colnames(rowData(se))[grep("bin.p.value",colnames(rowData(se)))-1]
+      for(f in c("coefficient","coefficients","log2fc","logFC",ff))
         if(is.null(y) && f %in% colnames(rowData(se))) y <- f
       if(is.null(y)) stop("Please specify `y` among the rowData columns.")
     }else{
@@ -199,9 +199,9 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
                           size=lineSize, alpha=min(0.6,alpha))
     }else{
       p <- p + geom_segment(data=d2,
-                          aes_string(x="x_start", xend="x_end", y="y_start",
-                                     yend="y_end", linetype="type", group=type),
-                          colour="grey", size=lineSize, alpha=min(0.6,alpha))
+                        aes_string(x="x_start", xend="x_end", y="y_start",
+                                   yend="y_end", linetype="type", group=type),
+                        colour="grey", size=lineSize, alpha=min(0.6,alpha))
     }
   }
   if(colour=="type" && type!="sample")
@@ -231,8 +231,8 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
 #' \code{\link{diffSpliceWrapper}} or \code{\link{DEXSeqWrapper}})
 #' @param n The maximum number of genes for which to plot labels
 #' @param FDR The FDR threshold above which to plot labels
-#' @param diffUTR Logical; if FALSE, uses absolute coefficients (appropriate for
-#' normal differential exon usage); if TRUE, uses non-absolute (i.e. changes
+#' @param diffUTR Logical; if FALSE, uses absolute coefficients (appropriate
+#' for normal differential exon usage); if TRUE, uses non-absolute (ie changes
 #' should be in the same direction across significant bins) and width-weighted
 #' scores (i.e. larger bins have more weight) -- this is relevant only when
 #' testing UTR usage.

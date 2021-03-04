@@ -44,22 +44,22 @@ DEXSeqWrapper(
 
 \item{coef}{The coefficient to be tested (ignored for `DEXSeqWrapper`).}
 
-\item{QLF}{Logical; whether to use edgeR's quasi-likelihood negative binomial
-(applicable only to `diffSpliceDGEWrapper`).}
+\item{QLF}{Logical; whether to use edgeR's quasi-likelihood negative
+binomial (applicable only to `diffSpliceDGEWrapper`).}
 
-\item{robust}{Logical; whether to use robust fitting for the dispersion trend
-(ignored for `DEXSeqWrapper`).}
+\item{robust}{Logical; whether to use robust fitting for the dispersion
+trend (ignored for `DEXSeqWrapper`).}
 
-\item{countFilter}{Logical; whether to filter out low-count bins (ignored for
-`DEXSeqWrapper`).}
+\item{countFilter}{Logical; whether to filter out low-count bins (ignored
+for `DEXSeqWrapper`).}
 
-\item{excludeTypes}{A vector of bin types to ignore for testing. To test for
-any kind of differential usage, leave empty. To test for differential UTR
-usage, use `excludeTypes=c("CDS","non-coding")` (or see
-\code{\link{geneLevelStats}} for more options).}
+\item{excludeTypes}{A vector of bin types to ignore for testing. To test
+for any kind of differential usage, leave empty. To test for differential
+UTR usage, use `excludeTypes=c("CDS","non-coding")` (or see
+ \code{\link{geneLevelStats}} for more options).}
 
-\item{improved}{Logical; whether to use \code{\link{diffSplice2}} instead of
-the original \code{\link[limma]{diffSplice}} (default TRUE).´}
+\item{improved}{Logical; whether to use \code{\link{diffSplice2}} instead
+of the original \code{\link[limma]{diffSplice}} (default TRUE).}
 
 \item{reducedModel}{A reduced formula (applicable only to `DEXSeqWrapper`).}
 

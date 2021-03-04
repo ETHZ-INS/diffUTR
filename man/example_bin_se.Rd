@@ -7,8 +7,8 @@
 a `RangedSummarizedExperiment`
 }
 \description{
-An object produced by \code{\link{countFeatures}} containing small subset of 
-genes from mouse hippocampal slices undergoing Forskolin-induced long-term 
+An object produced by \code{\link{countFeatures}} containing small subset of
+ genes from mouse hippocampal slices undergoing Forskolin-induced long-term
 potentiation (GSE84643).
 }
 \references{

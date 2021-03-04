@@ -26,7 +26,8 @@
 #' data(example_gene_annotation)
 #' bins <- prepareBins(example_gene_annotation)
 prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
-                         chrStyle="UCSC", maxUTRbinSize=15000, codingOnly=FALSE,
+                         chrStyle="UCSC", maxUTRbinSize=15000,
+                         codingOnly=FALSE,
                          genewise=FALSE, stranded=FALSE, verbose=TRUE ){
 
   if(verbose) message("Preparing annotation")
@@ -36,7 +37,8 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   if(onlyMainChr){
     #Extract only main chromosomes
     g <- keepStandardChromosomes(g, pruning.mode="coarse")
-    if(!is.null(APA)) APA <- keepStandardChromosomes(APA, pruning.mode="coarse")
+    if(!is.null(APA))
+      APA <- keepStandardChromosomes(APA, pruning.mode="coarse")
   }
   seqlevelsStyle(g) <- chrStyle
   seqlevels(g) <- seqlevelsInUse(g)
@@ -58,7 +60,9 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
     bins <- disjoin(g, with.revmap=TRUE, ignore.strand=!stranded)
     f <- rep(seq_along(bins), lengths(bins$revmap))
     mcols(bins) <- DataFrame(lapply( mcols(g)[unlist(bins$revmap),],
-                                     FUN=function(x) sort(unique(splitAsList(x,f)))))
+                                     FUN=function(x){
+                                       sort(unique(splitAsList(x,f)))
+                                     }))
   }
   rm(g)
 
@@ -69,7 +73,8 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
     #concatenate the lists with a + as seperator so each combination of
     # transcripts or type has a unique string as identifier
     #bins$type <- unstrsplit(CharacterList(bins$type),sep="+")
-    bt <- 100L*any(bt=="CDS") + 10L*any(bt=="UTR") + as.integer(any(bt=="3UTR"))
+    bt <- 100L*any(bt=="CDS") + 10L*any(bt=="UTR") +
+      as.integer(any(bt=="3UTR"))
     dict <- c("111"="CDS/UTR/3UTR", "110"="CDS/UTR", "100"="CDS",
               "11"="UTR/3UTR", "10"="UTR", "1"="3UTR")
     bt <- factor(bt, as.integer(names(dict)), as.character(dict))
@@ -80,11 +85,12 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   levels(bins$type) <- c(levels(bins$type), "non-coding")
   bins$tx <- unstrsplit(CharacterList(bins$tx), sep="+")
 
-  #duplicate ranges with more then one overlapping gene so each gene has a seperate range
+  # duplicate ranges with more then one overlapping gene so each gene has a
+  # separate range
 
   #find the number of genes overlapping this bin
   len<-lengths(bins$gene)
-  #for each bin repeat its index as many times as there are genes overlapping it
+  #for each bin repeat its index as many times as genes overlapping it
   repid<-rep(seq_along(bins),len)
   #save gene_id list for after
   gene_id=bins$gene
@@ -157,7 +163,8 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   synonyms <- list( type="type",
                     tx=c("tx_id","tx_name","transcript","transcript_id",
                          "transcript_name","tx"),
-                    gene=c("gene_id","gene","gene_name","gene_symbol","symbol"),
+                    gene=c("gene_id","gene","gene_name","gene_symbol",
+                           "symbol"),
                     tx_biotype=c("tx_biotype","transcript_biotype",
                                  "transcript_type"),
                     gene_biotype=c("gene_biotype","gene_type"))
@@ -346,20 +353,22 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   adder<-rep(adder,lengths(bins$revmap))
   trueidx<-unlist(bins$revmap)+adder
 
-  #get back metadata, tx_name as string with name of each overlapping transcrpit
+  #get back metadata, tx_name as string with name of each overlapping tx
   #name seperated by + gene_id as List of all genes overlapping this bin
   #type as string: with types overlapping this bin sperated by +
   #booltype->is utr or not
 
 
-  #for each bin create as many slots as there were overlapping regions and give
-  # themthe index of the bin
+  # for each bin create as many slots as there were overlapping regions and
+  # give them the index of the bin
   f <- rep(seq_along(bins), lengths(bins$revmap))
 
   #put the overlapping regions in to the slots and split them as list by the
   #index (bin they belong to), apply sort and unique in order to only get the
   #metadata once
   mcols(bins) <- DataFrame(lapply( mcols(unlist(a))[trueidx,],
-                                FUN=function(x) sort(unique(splitAsList(x,f)))))
+                                FUN=function(x){
+                                  sort(unique(splitAsList(x,f)))
+                                }))
   bins
 }
