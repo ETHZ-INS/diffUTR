@@ -21,7 +21,7 @@
 #' @importFrom stats ave pf pt terms
 #' @examples
 #' library(SummarizedExperiment)
-#' library(limma)
+#' library(edgeR)
 #' data(example_bin_se)
 #' se <- example_bin_se
 #' design <- model.matrix(~condition, data=as.data.frame(colData(se)))
