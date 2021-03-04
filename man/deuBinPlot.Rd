@@ -20,28 +20,30 @@ deuBinPlot(
 )
 }
 \arguments{
-\item{se}{A bin-wise SummarizedExperiment as produced by \code{\link{countFeatures}}
-and including bin-level tests (i.e. having been passed through one of the DEU wrappers
-such as \code{\link{diffSplice.wrapper}} or \code{\link{DEXSeq.wrapper}})}
+\item{se}{A bin-wise SummarizedExperiment as produced by
+\code{\link{countFeatures}} and including bin-level tests (i.e. having been
+passed through one of the DEU wrappers such as
+\code{\link{diffSpliceWrapper}} or \code{\link{DEXSeqWrapper}})}
 
 \item{gene}{The gene of interest}
 
-\item{type}{Either 'summary' (plot DEU summary), 'sample' (plot sample-wise data), or
-'condition' (plot data aggregate by condition)}
+\item{type}{Either 'summary' (plot DEU summary), 'sample' (plot sample-wise
+data), or 'condition' (plot data aggregate by condition)}
 
-\item{intronSize}{Intron plot size. If <=3, intron size will be this fraction of
-the mean exon size. If >3, each intron will have the given size.}
+\item{intronSize}{Intron plot size. If <=3, intron size will be this fraction
+of the mean exon size. If >3, each intron will have the given size.}
 
 \item{exonSize}{Scaling for exon sizes, either 'sqrt', 'log', or 'linear'.}
 
-\item{y}{Value to plot on the y-axis. If `type="summary"`, this should be a column of
-`rowData(se)`, otherwise should be an assay name of `se`.}
+\item{y}{Value to plot on the y-axis. If `type="summary"`, this should be a
+column of `rowData(se)`, otherwise should be an assay name of `se`.}
 
 \item{condition}{The colData column containing the samples' condition.}
 
 \item{size}{rowData variable to use to determine the thickness of the bins.}
 
-\item{lineSize}{Size of the line connecting the bins. Use `lineSize=0` to omit the line.}
+\item{lineSize}{Size of the line connecting the bins. Use `lineSize=0` to
+omit the line.}
 
 \item{colour}{rowData variable to use to determine the colour of the bins.
 If `type="condition"`, can also be "condition"; if `type="sample"` can be
@@ -60,6 +62,6 @@ deuBinPlot
 }
 \examples{
 data(example_bin_se)
-se <- diffSplice.wrapper(example_bin_se, ~condition)
+se <- diffSpliceWrapper(example_bin_se, ~condition)
 deuBinPlot(se, "Jund")
 }

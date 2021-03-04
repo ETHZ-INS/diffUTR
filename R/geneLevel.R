@@ -65,7 +65,7 @@ simes.aggregation <- function(p.value, geneid){
 #' @examples
 #' library(SummarizedExperiment)
 #' data(example_bin_se)
-#' se <- diffSplice.wrapper(example_bin_se, ~condition)
+#' se <- diffSpliceWrapper(example_bin_se, ~condition)
 #' se <- geneLevelStats(se, includeTypes="3UTR")
 #' head(metadata(se)$geneLevel)
 geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL,

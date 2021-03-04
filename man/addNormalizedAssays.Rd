@@ -7,10 +7,10 @@
 addNormalizedAssays(se, readLength = 50L)
 }
 \arguments{
-\item{se}{A bin-wise `SummarizedExperiment` as produced by 
+\item{se}{A bin-wise `SummarizedExperiment` as produced by
 \code{\link{countFeatures}}}
 
-\item{readLength}{Used as a minimum width to estimate read density 
+\item{readLength}{Used as a minimum width to estimate read density
 (default 50).}
 }
 \value{

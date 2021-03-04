@@ -6,8 +6,8 @@
 #' @param strandSpecific Passed to `Rsubread::featureCounts`
 #' @param readLength Used as a minimum width to estimate read density.
 #' @param allowMultiOverlap Passed to `Rsubread::featureCounts`
-#' @param inclNormalized Logical; whether to include normalized assays (needed for
-#' plotting)
+#' @param inclNormalized Logical; whether to include normalized assays (needed
+#' for plotting)
 #' @param ... Passed to `Rsubread::featureCounts`
 #'
 #' @return A \link[SummarizedExperiment]{RangedSummarizedExperiment-class}
@@ -28,7 +28,7 @@ countFeatures <- function(bamfiles, bins, strandSpecific=1, readLength=50L,
   binsframe$GeneID <- names(bins)
 
   if(is.null(names(bamfiles))) names(bamfiles) <- .cleanNames(bamfiles)
-  
+
   hits <- Rsubread::featureCounts( bamfiles, ...,
                                    annot.ext=binsframe,
                                    isGTFAnnotationFile=FALSE,

@@ -26,8 +26,8 @@ containing such an object}
 
 \item{allowMultiOverlap}{Passed to `Rsubread::featureCounts`}
 
-\item{inclNormalized}{Logical; whether to include normalized assays (needed for
-plotting)}
+\item{inclNormalized}{Logical; whether to include normalized assays (needed
+for plotting)}
 
 \item{...}{Passed to `Rsubread::featureCounts`}
 }

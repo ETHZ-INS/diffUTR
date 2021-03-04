@@ -41,7 +41,8 @@ rmLCS <- function(x, delim=""){
   tmp <- strsplit(as.character(x),delim,fixed=TRUE)
   if(any(lengths(tmp)==1)) return(x)
   i <- 1
-  while(length(unique(vapply(tmp,FUN.VALUE=character(1), FUN=function(x) x[i])))==1){
+  while(length(unique(vapply(tmp, FUN.VALUE=character(1),
+                             FUN=function(x) x[i])))==1){
     i <- i+1
   }
   if(i==1) return(x)

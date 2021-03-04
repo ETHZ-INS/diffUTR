@@ -16,13 +16,15 @@ geneBinHeatmap(
 )
 }
 \arguments{
-\item{se}{A bin-wise SummarizedExperiment as produced by \code{\link{countFeatures}}}
+\item{se}{A bin-wise SummarizedExperiment as produced by
+\code{\link{countFeatures}}}
 
 \item{gene}{The gene of interest}
 
 \item{what}{Type of values (i.e. assay) to plot}
 
-\item{anno_rows}{Row annotation columns (i.e. columns of `rowData(se)`) to plot}
+\item{anno_rows}{Row annotation columns (i.e. columns of `rowData(se)`) to
+plot}
 
 \item{anno_colors}{Annotation colors (passed to `SEtools::sechm`)}
 
@@ -42,6 +44,6 @@ geneBinHeatmap
 }
 \examples{
 data(example_bin_se)
-se <- diffSplice.wrapper(example_bin_se, ~condition)
+se <- diffSpliceWrapper(example_bin_se, ~condition)
 geneBinHeatmap(se, "Jund")
 }

@@ -1,9 +1,11 @@
 #' geneBinHeatmap
 #'
-#' @param se A bin-wise SummarizedExperiment as produced by \code{\link{countFeatures}}
+#' @param se A bin-wise SummarizedExperiment as produced by
+#' \code{\link{countFeatures}}
 #' @param gene The gene of interest
 #' @param what Type of values (i.e. assay) to plot
-#' @param anno_rows Row annotation columns (i.e. columns of `rowData(se)`) to plot
+#' @param anno_rows Row annotation columns (i.e. columns of `rowData(se)`) to
+#' plot
 #' @param anno_colors Annotation colors (passed to `SEtools::sechm`)
 #' @param removeAmbiguous Logical; whether to remove bins that are
 #' gene-ambiguous (i.e. overlap multiple genes).
@@ -19,7 +21,7 @@
 #'
 #' @examples
 #' data(example_bin_se)
-#' se <- diffSplice.wrapper(example_bin_se, ~condition)
+#' se <- diffSpliceWrapper(example_bin_se, ~condition)
 #' geneBinHeatmap(se, "Jund")
 geneBinHeatmap <- function(se, gene,
                            what=c("logNormDensity", "logCPM", "scaledLogCPM"),
@@ -50,20 +52,22 @@ geneBinHeatmap <- function(se, gene,
 
 #' deuBinPlot
 #'
-#' @param se A bin-wise SummarizedExperiment as produced by \code{\link{countFeatures}}
-#' and including bin-level tests (i.e. having been passed through one of the DEU wrappers
-#' such as \code{\link{diffSplice.wrapper}} or \code{\link{DEXSeq.wrapper}})
+#' @param se A bin-wise SummarizedExperiment as produced by
+#' \code{\link{countFeatures}} and including bin-level tests (i.e. having been
+#' passed through one of the DEU wrappers such as
+#' \code{\link{diffSpliceWrapper}} or \code{\link{DEXSeqWrapper}})
 #' @param gene The gene of interest
-#' @param type Either 'summary' (plot DEU summary), 'sample' (plot sample-wise data), or
-#' 'condition' (plot data aggregate by condition)
-#' @param intronSize Intron plot size. If <=3, intron size will be this fraction of
-#' the mean exon size. If >3, each intron will have the given size.
+#' @param type Either 'summary' (plot DEU summary), 'sample' (plot sample-wise
+#' data), or 'condition' (plot data aggregate by condition)
+#' @param intronSize Intron plot size. If <=3, intron size will be this fraction
+#'  of the mean exon size. If >3, each intron will have the given size.
 #' @param exonSize Scaling for exon sizes, either 'sqrt', 'log', or 'linear'.
-#' @param y Value to plot on the y-axis. If `type="summary"`, this should be a column of
-#' `rowData(se)`, otherwise should be an assay name of `se`.
+#' @param y Value to plot on the y-axis. If `type="summary"`, this should be a
+#' column of `rowData(se)`, otherwise should be an assay name of `se`.
 #' @param condition The colData column containing the samples' condition.
 #' @param size rowData variable to use to determine the thickness of the bins.
-#' @param lineSize Size of the line connecting the bins. Use `lineSize=0` to omit the line.
+#' @param lineSize Size of the line connecting the bins. Use `lineSize=0` to
+#' omit the line.
 #' @param colour rowData variable to use to determine the colour of the bins.
 #' If `type="condition"`, can also be "condition"; if `type="sample"` can be
 #' any colData column.
@@ -79,7 +83,7 @@ geneBinHeatmap <- function(se, gene,
 #'
 #' @examples
 #' data(example_bin_se)
-#' se <- diffSplice.wrapper(example_bin_se, ~condition)
+#' se <- diffSpliceWrapper(example_bin_se, ~condition)
 #' deuBinPlot(se, "Jund")
 deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
                        intronSize=2, exonSize=c("sqrt","linear","log"), y=NULL,
@@ -138,7 +142,8 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
   if(size=="type"){
     levels(de$type)[grepl("CDS/.*UTR", levels(de$type))] <- "CDS/UTR"
     levels(de$type)[grep("CDS/.*UTR", levels(de$type))] <- "CDS/UTR"
-    levels(de$type)[grep("CDS|non-coding", levels(de$type), invert=TRUE)] <- "UTR"
+    levels(de$type)[grep("CDS|non-coding", levels(de$type), invert=TRUE)] <-
+      "UTR"
     de$type <- factor(de$type, c("non-coding","UTR","CDS/UTR","CDS"))
   }
 
@@ -146,14 +151,17 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
   de$log10PValue <- -log10(de$bin.p.value)
   de$order <- seq_len(nrow(de))
   de$width <- width(gr)
-  de$width2 <- switch(exonSize, sqrt=sqrt(de$width), log=log(de$width), de$width)
+  de$width2 <- switch(exonSize, sqrt=sqrt(de$width), log=log(de$width),
+                      de$width)
   de$nextIsIntron <- c(start(gr)[-1],rev(end(gr))[1]) > end(gr)+1
   if(intronSize <= 3) intronSize <- intronSize*mean(de$width2)
-  de$x_start <- c(0,cumsum(de$width2)+cumsum(de$nextIsIntron*intronSize))[-nrow(de)]
+  de$x_start <- c(0,cumsum(de$width2)+
+                    cumsum(de$nextIsIntron*intronSize))[-nrow(de)]
   de$x_end <- de$x_start + de$width2
-  getd2 <- function(de) data.frame(x_start=de$x_end[-nrow(de)], x_end=de$x_start[-1],
-                                   y_start=de[[y]][-nrow(de)], y_end=de[[y]][-1],
-                                   type=de$nextIsIntron[-nrow(de)])
+  getd2 <- function(de)
+    data.frame( x_start=de$x_end[-nrow(de)], x_end=de$x_start[-1],
+                y_start=de[[y]][-nrow(de)], y_end=de[[y]][-1],
+                type=de$nextIsIntron[-nrow(de)])
   p <- ggplot(as.data.frame(de))
   if(type=="summary"){
     if(lineSize>0){
@@ -185,14 +193,15 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
     }
     if(type=="sample" && lineSize>0 && colour %in% colnames(d2)){
       p <- p + geom_segment(data=d2,
-                            aes_string(x="x_start", xend="x_end", y="y_start",
-                                       yend="y_end", linetype="type", colour=colour),
-                            size=lineSize, alpha=min(0.6,alpha))
+                          aes_string(x="x_start", xend="x_end", y="y_start",
+                                     yend="y_end", linetype="type",
+                                     colour=colour),
+                          size=lineSize, alpha=min(0.6,alpha))
     }else{
       p <- p + geom_segment(data=d2,
-                            aes_string(x="x_start", xend="x_end", y="y_start",
-                                       yend="y_end", linetype="type", group=type),
-                            colour="grey", size=lineSize, alpha=min(0.6,alpha))
+                          aes_string(x="x_start", xend="x_end", y="y_start",
+                                     yend="y_end", linetype="type", group=type),
+                          colour="grey", size=lineSize, alpha=min(0.6,alpha))
     }
   }
   if(colour=="type" && type!="sample")
@@ -203,7 +212,8 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
   xlab <- switch(exonSize,
                  linear="Genomic location",
                  paste0(exonSize,"-scaled genomic location"))
-  p + scale_linetype_manual(values=c("TRUE"="dotted", "FALSE"="solid"), guide=FALSE) +
+  p + scale_linetype_manual(values=c("TRUE"="dotted", "FALSE"="solid"),
+                            guide=FALSE) +
     geom_segment(data=as.data.frame(de), alpha=alpha,
                  aes_string(x="x_start", xend="x_end", y=y, yend=y, size=size,
                             colour=colour)) +
@@ -218,7 +228,7 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
 #' @param se A bin-wise SummarizedExperiment as produced by
 #' \code{\link{countFeatures}} and including bin-level tests (i.e. having been
 #' passed through one of the DEU wrappers such as
-#' \code{\link{diffSplice.wrapper}} or \code{\link{DEXSeq.wrapper}})
+#' \code{\link{diffSpliceWrapper}} or \code{\link{DEXSeqWrapper}})
 #' @param n The maximum number of genes for which to plot labels
 #' @param FDR The FDR threshold above which to plot labels
 #' @param diffUTR Logical; if FALSE, uses absolute coefficients (appropriate for
@@ -236,7 +246,7 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
 #'
 #' @examples
 #' data(example_bin_se)
-#' se <- diffSplice.wrapper(example_bin_se, ~condition)
+#' se <- diffSpliceWrapper(example_bin_se, ~condition)
 #' plotTopGenes(se)
 plotTopGenes <- function(se, n=25, FDR=0.05, diffUTR=FALSE, alpha=NULL){
   if(is(se, "SummarizedExperiment")){

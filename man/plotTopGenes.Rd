@@ -10,7 +10,7 @@ plotTopGenes(se, n = 25, FDR = 0.05, diffUTR = FALSE, alpha = NULL)
 \item{se}{A bin-wise SummarizedExperiment as produced by
 \code{\link{countFeatures}} and including bin-level tests (i.e. having been
 passed through one of the DEU wrappers such as
-\code{\link{diffSplice.wrapper}} or \code{\link{DEXSeq.wrapper}})}
+\code{\link{diffSpliceWrapper}} or \code{\link{DEXSeqWrapper}})}
 
 \item{n}{The maximum number of genes for which to plot labels}
 
@@ -32,6 +32,6 @@ plotTopGenes
 }
 \examples{
 data(example_bin_se)
-se <- diffSplice.wrapper(example_bin_se, ~condition)
+se <- diffSpliceWrapper(example_bin_se, ~condition)
 plotTopGenes(se)
 }

@@ -26,13 +26,13 @@ library(BiocStyle)
 
 `diffUTR` wraps around three methods for different exon usage analysis:
 
-* The `r BiocStyle::Biocpkg("DEXSeq")` package (see `?DEXSeq.wrapper`)
-* An improved version of `r BiocStyle::Biocpkg("limma")`'s `diffSplice` method (see `?diffSplice.wrapper`)
-* `r BiocStyle::Biocpkg("edgeR")`'s `diffSpliceDGE` method (see `?diffSpliceDGE.wrapper`)
+* The `r BiocStyle::Biocpkg("DEXSeq")` package (see `?DEXSeqWrapper`)
+* An improved version of `r BiocStyle::Biocpkg("limma")`'s `diffSplice` method (see `?diffSpliceWrapper`)
+* `r BiocStyle::Biocpkg("edgeR")`'s `diffSpliceDGE` method (see `?diffSpliceDGEWrapper`)
 
 All three wrappers have been designed to use the same input (the `RangedSummarizedExperiment` object created by `countFeatures` -- see below) and produce highly similar outputs, so that they can all be used with the same downstream plotting functions (Figure 1A).
 
-Based on various benchmarks (e.g. [Sonenson et al. 2016](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0862-3)), `r BiocStyle::Biocpkg("DEXSeq")` is the most accurate of the three methods, and should therefore be the method of choice. It is however very slow and does not scale well to larger sample sizes. We therefore suggest our improved _diffSplice2_ method (`?diffSplice.wrapper`) when `r BiocStyle::Biocpkg("DEXSeq")` is not an option.
+Based on various benchmarks (e.g. [Sonenson et al. 2016](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0862-3)), `r BiocStyle::Biocpkg("DEXSeq")` is the most accurate of the three methods, and should therefore be the method of choice. It is however very slow and does not scale well to larger sample sizes. We therefore suggest our improved _diffSplice2_ method (`?diffSpliceWrapper`) when `r BiocStyle::Biocpkg("DEXSeq")` is not an option.
 
 ```{r echo = FALSE, fig.cap = "A: Overview of the diffUTR workflow. B: Bin creation scheme."}
 knitr::include_graphics(system.file('docs', 'figure1.svg', package = 'diffUTR'))
@@ -53,7 +53,7 @@ Install the package with:
 ```{r, eval=FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-BiocManager::install("plger/diffUTR")
+BiocManager::install("diffUTR")
 ```
 
 We load diffUTR as well as the `r BiocStyle::Biocpkg("SummarizedExperiment")` package on which it depends:
@@ -121,7 +121,6 @@ rse
 The output of `countFeatures` is a RangedSummarizedExperiment object (see `r BiocStyle::Biocpkg("SummarizedExperiment")`) containing the samples' counts (as well as normalized assays) across bins, as well as all the bin information in the `rowRanges(se)`:
 
 ```{r}
-rse
 head(rowRanges(rse))
 ```
 In this example only a subset of information was retained, but the original file stores any information present in the annotation (e.g. transcripts, biotype, etc.)
@@ -131,7 +130,7 @@ In this example only a subset of information was retained, but the original file
 For the purpose of this example, we will use the improved diffSplice method:
 
 ```{r}
-rse <- diffSplice.wrapper(rse, design = ~condition)
+rse <- diffSpliceWrapper(rse, design = ~condition)
 ```
 
 The `~condition` formula indicates that the samples should be split according to the `group` column of `colData(rse)`. Alternatively to the formula inferace, a `model.matrix` can be directly passed. For more complex models involving several terms, you will have to specify the coefficient to test using the `coef` argument.
@@ -188,7 +187,7 @@ se <- countFeatures(bamfiles, bins, strandSpecific=2, nthreads=6, isPairedEnd=TR
 Differential analysis also works in the same way. By default, this will look for changes in _any_ bin type; if you want to restrict the gene-level aggregation to UTR bins, you can use:
 
 ```{r}
-rse <- diffSplice.wrapper(rse, design = ~condition, excludeTypes = c("CDS","non-coding"))
+rse <- diffSpliceWrapper(rse, design = ~condition, excludeTypes = c("CDS","non-coding"))
 ```
 
 See also `?geneLevelStats` for more options.
@@ -255,3 +254,10 @@ geneBinHeatmap(rse, "Smg6")
 Bins that are overlapping multiple genes will be flagged as such (here there are none).
 
 We found these representations particularly useful to prioritize candidates from differential bin usage analyses. For example, many genes show differential usage of bins which are generally not included in most transcripts of that gene (low count density), and are therefore less likely to be relevant. On the other hand, some genes show massive expression of a single bin which might (or might not) represent a different, unannotated transcript.
+
+<br/><br/>
+***
+
+```{r}
+sessionInfo()
+```

@@ -27,3 +27,15 @@ gene level tests. Results are sorted by geneid and by exonid within gene.
 This is a small improvement to the \code{\link[limma]{diffSplice}} function written by
 Gordon Smyth and Charity Law.
 }
+\examples{
+library(SummarizedExperiment)
+library(limma)
+data(example_bin_se)
+se <- example_bin_se
+design <- model.matrix(~condition, data=as.data.frame(colData(se)))
+dds <- calcNormFactors(DGEList(assays(se)$counts))
+dds <- voom(dds, design)
+dds <- lmFit(dds, design)
+res <- diffSplice2(dds, geneid=rowData(se)$gene, exonid=row.names(se))
+topSplice(res)
+}

@@ -17,12 +17,24 @@
 #' @import limma
 #' @importFrom methods new
 #' @importFrom stats ave pf pt terms
+#' @examples
+#' library(SummarizedExperiment)
+#' library(limma)
+#' data(example_bin_se)
+#' se <- example_bin_se
+#' design <- model.matrix(~condition, data=as.data.frame(colData(se)))
+#' dds <- calcNormFactors(DGEList(assays(se)$counts))
+#' dds <- voom(dds, design)
+#' dds <- lmFit(dds, design)
+#' res <- diffSplice2(dds, geneid=rowData(se)$gene, exonid=row.names(se))
+#' topSplice(res)
 diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
-  #Exon Level squeeze, exon.s2.post t-test and weighting, sum of exon.df as gene.df after squeeze
+  # Exon Level squeeze, exon.s2.post t-test and weighting,
+  # sum of exon.df as gene.df after squeeze
   exon.genes <- fit$genes
   if(is.null(exon.genes)) exon.genes <- data.frame(ExonID=seq_len(nrow(fit)))
 
-  #	Get ID columns for genes and exons
+  # Get ID columns for genes and exons
   if(length(geneid)==1) {
     genecolname <- as.character(geneid)
     geneid <- exon.genes[[genecolname]]
@@ -42,13 +54,13 @@ diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
     }
   }
 
-  #	Treat NA geneids as genes with one exon
+  # Treat NA geneids as genes with one exon
   if(anyNA(geneid)) {
     isna <- which(is.na(geneid))
     geneid[isna] <- paste0("NA",seq_along(isna))
   }
 
-  #	Sort by geneid
+  # Sort by geneid
   if(is.null(exonid))
     o <- order(geneid)
   else
@@ -60,7 +72,7 @@ diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
   exon.df.residual <- fit$df.residual[o]
   exon.s2 <- fit$sigma[o]^2
 
-  # 	Count exons by gene and get genewise variances
+  # Count exons by gene and get genewise variances
   exon.stat <- cbind(1,exon.df.residual,exon.s2)
   gene.sum <- rowsum(exon.stat,geneid,reorder=FALSE)
   gene.nexons <- gene.sum[,1]
@@ -74,11 +86,11 @@ diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
     cat("Max number of exons in a gene: ", max(gene.nexons), "\n")
   }
 
-  #	Posterior genewise variances
+  # Posterior genewise variances
   squeeze <- squeezeVar(var=exon.s2, df=exon.df.residual, robust=robust)
 
 
-  #	Remove genes with only 1 exon
+  # Remove genes with only 1 exon
   gene.keep <- gene.nexons>1
   ngenes <- sum(gene.keep)
   if(ngenes==0) stop("No genes with more than one exon")
@@ -99,12 +111,12 @@ diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
   gene.df.total <- rowsum(exon.df.total,geneid,reorder=FALSE)
   exon.s2.post <- squeeze$var.post[exon.keep]
 
-  # 	Genewise betas
+  # Genewise betas
   u2 <- 1/(exon.stdev.unscaled^2*exon.s2.post)
   u2.rowsum <- rowsum(u2,geneid,reorder=FALSE)
   gene.betabar <- rowsum(exon.coefficients*u2,geneid,reorder=FALSE) / u2.rowsum
 
-  #	T-statistics for exon-level tests
+  # T-statistics for exon-level tests
   g <- rep(seq_len(ngenes), times=gene.nexons)
   exon.coefficients <- exon.coefficients-gene.betabar[g,,drop=FALSE]
   exon.1mleverage <- 1 - (u2 / u2.rowsum[g,,drop=FALSE])
@@ -113,9 +125,10 @@ diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
   gene.F <- rowsum(exon.t^2,geneid,reorder=FALSE) / gene.df.test
 
   exon.p.value <- 2 * pt(abs(exon.t), df=gene.df.total[g], lower.tail=FALSE)
-  gene.F.p.value <- pf(gene.F, df1=gene.df.test, df2=gene.df.total, lower.tail=FALSE)
+  gene.F.p.value <- pf(gene.F, df1=gene.df.test, df2=gene.df.total,
+                       lower.tail=FALSE)
 
-  #	Exon level output
+  # Exon level output
   out <- new("MArrayLM",list())
   out$genes <- exon.genes
   out$genecolname <- genecolname
@@ -124,7 +137,7 @@ diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
   out$t <- exon.t
   out$p.value <- exon.p.value
 
-  #	Gene level output
+  # Gene level output
   out$gene.df.prior <- squeeze$df.prior
   out$gene.df.residual <- gene.df.residual
   out$gene.df.total <- gene.df.total
@@ -132,7 +145,7 @@ diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
   out$gene.F <- gene.F
   out$gene.F.p.value <- gene.F.p.value
 
-  #	Which columns of exon.genes contain gene level annotation?
+  # Which columns of exon.genes contain gene level annotation?
   gene.lastexon <- cumsum(gene.nexons)
   gene.firstexon <- gene.lastexon-gene.nexons+1
   no <- logical(nrow(exon.genes))
@@ -143,7 +156,7 @@ diffSplice2 <- function(fit, geneid, exonid=NULL, robust=FALSE, verbose=TRUE){
   out$gene.firstexon <- gene.firstexon
   out$gene.lastexon <- gene.lastexon
 
-  #	Simes adjustment of exon level p-values
+  # Simes adjustment of exon level p-values
   penalty <- rep_len(1L,length(g))
   penalty[gene.lastexon] <- 1L-gene.nexons
   penalty <- cumsum(penalty)[-gene.lastexon]
