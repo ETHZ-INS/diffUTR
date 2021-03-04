@@ -7,7 +7,7 @@
 countFeatures(
   bamfiles,
   bins,
-  strandSpecific = 1,
+  strandSpecific = 0,
   readLength = 50L,
   allowMultiOverlap = TRUE,
   inclNormalized = TRUE,
@@ -36,4 +36,12 @@ A \link[SummarizedExperiment]{RangedSummarizedExperiment-class}
 }
 \description{
 countFeatures
+}
+\examples{
+data("example_gene_annotation", package="diffUTR")
+bins <- prepareBins(example_gene_annotation)
+bam_files <- list.files(system.file("extdata", package="diffUTR"),
+                        pattern="bam$", full=TRUE)
+se <- countFeatures(bam_files, bins, isPairedEnd=TRUE)
+se
 }

@@ -15,7 +15,14 @@
 #' @importFrom Rsubread featureCounts
 #' @importFrom edgeR DGEList cpm calcNormFactors
 #' @export
-countFeatures <- function(bamfiles, bins, strandSpecific=1, readLength=50L,
+#' @examples
+#' data("example_gene_annotation", package="diffUTR")
+#' bins <- prepareBins(example_gene_annotation)
+#' bam_files <- list.files(system.file("extdata", package="diffUTR"),
+#'                         pattern="bam$", full=TRUE)
+#' se <- countFeatures(bam_files, bins, isPairedEnd=TRUE)
+#' se
+countFeatures <- function(bamfiles, bins, strandSpecific=0, readLength=50L,
                           allowMultiOverlap=TRUE, inclNormalized=TRUE, ...){
   if(is.character(bins) && length(bins)==1 && grepl("\\.rds$", bins)){
     bins <- readRDS(bins)
@@ -35,7 +42,8 @@ countFeatures <- function(bamfiles, bins, strandSpecific=1, readLength=50L,
                                    strandSpecific=strandSpecific,
                                    allowMultiOverlap=allowMultiOverlap,
                                    useMetaFeatures=FALSE )
-  se <- SummarizedExperiment(list(counts=as.matrix(hits$counts)),rowRanges=bins)
+  se <- SummarizedExperiment(list(counts=as.matrix(hits$counts)),
+                             rowRanges=bins)
   colnames(se) <- names(bamfiles)
   wi <- pmax(width(se),readLength)
   assays(se)$logcpm <- log1p(cpm(calcNormFactors(DGEList(assay(se)))))
