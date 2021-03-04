@@ -129,6 +129,7 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   bins
 }
 
+#' @importFrom ensembldb genes cdsBy exons
 .prepGeneAnno <- function(g, verbose=TRUE){
   if(is.character(g) && length(g)==1) {
     if (grepl("\\.gtf$", g)) {
@@ -140,13 +141,13 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
 
   if(isEnsDb <- is(g,"EnsDb")){
     if(verbose) message("Extracting exon information from EnsDb")
-    e <- exons(ensdb, c("exon_id","tx_id","gene_id","gene_name",
+    e <- exons(g, c("exon_id","tx_id","gene_id","gene_name",
                         "gene_biotype","tx_biotype"))
     e$type <- "exon"
-    cd <- unlist(cdsBy(ensdb,
+    cd <- unlist(cdsBy(g,
                        columns=c("tx_id","tx_biotype","gene_id","gene_name")))
     cd$type <- "CDS"
-    g <- genes(ensdb, c("gene_id","gene_name"))
+    g <- genes(g, c("gene_id","gene_name"))
     g$type <- "gene"
     g <- sort(c(g,e,cd))
     rm(e,cd)
