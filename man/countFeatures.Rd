@@ -11,6 +11,7 @@ countFeatures(
   readLength = 50L,
   allowMultiOverlap = TRUE,
   inclNormalized = TRUE,
+  tmpDir = tempdir(),
   ...
 )
 }
@@ -28,6 +29,8 @@ containing such an object}
 
 \item{inclNormalized}{Logical; whether to include normalized assays (needed
 for plotting)}
+
+\item{tmpDir}{Passed to `Rsubread::featureCounts`}
 
 \item{...}{Passed to `Rsubread::featureCounts`}
 }

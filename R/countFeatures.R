@@ -8,6 +8,7 @@
 #' @param allowMultiOverlap Passed to `Rsubread::featureCounts`
 #' @param inclNormalized Logical; whether to include normalized assays (needed
 #' for plotting)
+#' @param tmpDir Passed to `Rsubread::featureCounts`
 #' @param ... Passed to `Rsubread::featureCounts`
 #'
 #' @return A \link[SummarizedExperiment]{RangedSummarizedExperiment-class}
@@ -23,7 +24,8 @@
 #' se <- countFeatures(bam_files, bins, isPairedEnd=TRUE)
 #' se
 countFeatures <- function(bamfiles, bins, strandSpecific=0, readLength=50L,
-                          allowMultiOverlap=TRUE, inclNormalized=TRUE, ...){
+                          allowMultiOverlap=TRUE, inclNormalized=TRUE,
+                          tmpDir=tempdir(), ...){
   if(is.character(bins) && length(bins)==1 && grepl("\\.rds$", bins)){
     bins <- readRDS(bins)
   }
@@ -36,7 +38,7 @@ countFeatures <- function(bamfiles, bins, strandSpecific=0, readLength=50L,
 
   if(is.null(names(bamfiles))) names(bamfiles) <- .cleanNames(bamfiles)
 
-  hits <- Rsubread::featureCounts( bamfiles, ...,
+  hits <- Rsubread::featureCounts( bamfiles, ..., tmpDir=tmpDir,
                                    annot.ext=binsframe,
                                    isGTFAnnotationFile=FALSE,
                                    strandSpecific=strandSpecific,
