@@ -12,7 +12,7 @@
 #' parameters be robustified against outlier sample variances?
 #' @param verbose logical, if TRUE will output some diagnostic information
 #'
-#' @return An \code{\link[limma]{MArrayLM-class}} objectcontaining both exon
+#' @return An \code{\link[limma]{MArrayLM-class}} object containing both exon
 #' level and gene level tests. Results are sorted by geneid and by exonid
 #' within gene.
 #' @export
