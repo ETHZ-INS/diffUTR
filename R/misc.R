@@ -38,6 +38,7 @@ addNormalizedAssays <- function(se, readLength=50L){
 # remove the longest common string at the beginning of all elements of a
 # character vector
 rmLCS <- function(x, delim=""){
+  if(length(x)==1) return(x)
   tmp <- strsplit(as.character(x),delim,fixed=TRUE)
   if(any(lengths(tmp)==1)) return(x)
   i <- 1

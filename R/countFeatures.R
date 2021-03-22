@@ -21,7 +21,7 @@
 #' bins <- prepareBins(example_gene_annotation)
 #' bam_files <- list.files(system.file("extdata", package="diffUTR"),
 #'                         pattern="bam$", full=TRUE)
-#' se <- countFeatures(bam_files, bins)
+#' se <- countFeatures(bam_files, bins, verbose=FALSE)
 #' se
 countFeatures <- function(bamfiles, bins, strandSpecific=0, readLength=50L,
                           allowMultiOverlap=TRUE, inclNormalized=TRUE,
@@ -48,13 +48,17 @@ countFeatures <- function(bamfiles, bins, strandSpecific=0, readLength=50L,
                              rowRanges=bins)
   colnames(se) <- names(bamfiles)
   wi <- pmax(width(se),readLength)
-  assays(se)$logcpm <- log1p(cpm(calcNormFactors(DGEList(assay(se)))))
+  if(ncol(se)==1){
+    assays(se)$logcpm <- log1p(assay(se)*10^6/sum(as.numeric(assay(se))))
+  }else{
+    assays(se)$logcpm <- log1p(cpm(calcNormFactors(DGEList(assay(se)))))
+  }
   assays(se)$logNormDensity <- log1p(exp(assays(se)$logcpm)/wi)
   rowData(se)$meanLogCPM <- rowMeans(assays(se)$logcpm)
   rowData(se)$logWidth <- log1p(width(se))
   rowData(se)$meanLogDensity <- rowMeans(assays(se)$logNormDensity)
-  colData(se)$assigned <- as.numeric(hits$stat[1,-1])
-  colData(se)$unassigned <- colSums(hits$stat[-1,-1])
+  colData(se)$assigned <- as.numeric(hits$stat[1,-1,drop=FALSE])
+  colData(se)$unassigned <- colSums(hits$stat[-1,-1,drop=FALSE])
   if(!inclNormalized) assays(se) <- assays(se)[1]
   se
 }
