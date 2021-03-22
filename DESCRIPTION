@@ -1,7 +1,7 @@
 Package: diffUTR
 Type: Package
 Title: diffUTR: Streamlining differential exon and 3' UTR usage
-Version: 0.99.22
+Version: 0.99.23
 Depends: R (>= 4.1)
 Authors@R: c(
 	person("Pierre-Luc", "Germain", email="pierre-luc.germain@hest.ethz.ch", role=c("cre","aut"), comment = c(ORCID = "0000-0003-3418-4218")), 
@@ -9,7 +9,7 @@ Authors@R: c(
 Description: The diffUTR package provides a uniform interface and plotting functions for limma/edgeR/DEXSeq -powered differential bin/exon usage.
 	It includes in addition an improved version of the limma::diffSplice method. Most importantly, diffUTR further extends the application of these frameworks 
 	to differential UTR usage analysis using poly-A site databases.
-Imports: S4Vectors, SummarizedExperiment, limma, edgeR, DEXSeq, GenomicRanges, SEtools, Rsubread, ggplot2, rtracklayer, ComplexHeatmap, ggrepel, stringi, methods, stats, GenomeInfoDb, dplyr, matrixStats, IRanges, ensembldb
+Imports: S4Vectors, SummarizedExperiment, limma, edgeR, DEXSeq, GenomicRanges, Rsubread, ggplot2, rtracklayer, ComplexHeatmap, ggrepel, stringi, methods, stats, GenomeInfoDb, dplyr, matrixStats, IRanges, ensembldb
 Suggests: BiocStyle, knitr
 biocViews: GeneExpression
 BugReports: https://github.com/ETHZ-INS/diffUTR

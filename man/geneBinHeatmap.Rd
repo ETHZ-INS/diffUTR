@@ -9,9 +9,13 @@ geneBinHeatmap(
   gene,
   what = c("logNormDensity", "logCPM", "scaledLogCPM"),
   anno_rows = c("type", "logWidth", "meanLogDensity", "log10PValue", "geneAmbiguous"),
+  anno_columns = c(),
   anno_colors = list(),
   removeAmbiguous = FALSE,
   merge_legends = TRUE,
+  cluster_columns = FALSE,
+  left_annotation = NULL,
+  top_annotation = NULL,
   ...
 )
 }
@@ -26,7 +30,13 @@ geneBinHeatmap(
 \item{anno_rows}{Row annotation columns (i.e. columns of `rowData(se)`) to
 plot}
 
-\item{anno_colors}{Annotation colors (passed to `SEtools::sechm`)}
+\item{anno_columns}{Column annotation columns (i.e. columns of
+`colData(se)`) to plot}
+
+\item{anno_colors}{Annotation colors, as a list named with the row/column
+annotations, see `\code{\link[ComplexHeatmap]{SingleAnnotation}}` for
+details. Ignored if `left_annotation` and/or `top_annotation` are given
+directly.}
 
 \item{removeAmbiguous}{Logical; whether to remove bins that are
 gene-ambiguous (i.e. overlap multiple genes).}
@@ -34,13 +44,23 @@ gene-ambiguous (i.e. overlap multiple genes).}
 \item{merge_legends}{Logical; whether to merge legends. This effectively
 calls `draw(..., merge_legends=TRUE)` around the heatmap.}
 
-\item{...}{Passed to `sechm` (see \code{\link[SEtools]{SE-heatmap}}).}
+\item{cluster_columns}{Logical; whether to cluster columns (passed to
+\code{\link[ComplexHeatmap]{Heatmap}})}
+
+\item{left_annotation}{Passed to \code{\link[ComplexHeatmap]{Heatmap}},
+overrides `anno_rows`.}
+
+\item{top_annotation}{Passed to \code{\link[ComplexHeatmap]{Heatmap}},
+overrides `anno_columns`.}
+
+\item{...}{Passed to `ComplexHeatmap` (see
+\code{\link[ComplexHeatmap]{Heatmap}})}
 }
 \value{
 A \code{\link[ComplexHeatmap]{Heatmap}}
 }
 \description{
-geneBinHeatmap
+A wrapper around `ComplexHeatmap`.
 }
 \examples{
 data(example_bin_se)

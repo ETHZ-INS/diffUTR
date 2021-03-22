@@ -1,23 +1,36 @@
 #' geneBinHeatmap
 #'
+#' A wrapper around `ComplexHeatmap`.
+#'
 #' @param se A bin-wise SummarizedExperiment as produced by
 #' \code{\link{countFeatures}}
 #' @param gene The gene of interest
 #' @param what Type of values (i.e. assay) to plot
 #' @param anno_rows Row annotation columns (i.e. columns of `rowData(se)`) to
 #' plot
-#' @param anno_colors Annotation colors (passed to `SEtools::sechm`)
+#' @param anno_columns Column annotation columns (i.e. columns of
+#' `colData(se)`) to plot
+#' @param anno_colors Annotation colors, as a list named with the row/column
+#' annotations, see `\code{\link[ComplexHeatmap]{SingleAnnotation}}` for
+#' details. Ignored if `left_annotation` and/or `top_annotation` are given
+#' directly.
 #' @param removeAmbiguous Logical; whether to remove bins that are
 #' gene-ambiguous (i.e. overlap multiple genes).
 #' @param merge_legends Logical; whether to merge legends. This effectively
 #' calls `draw(..., merge_legends=TRUE)` around the heatmap.
-#' @param ... Passed to `sechm` (see \code{\link[SEtools]{SE-heatmap}}).
+#' @param cluster_columns Logical; whether to cluster columns (passed to
+#' \code{\link[ComplexHeatmap]{Heatmap}})
+#' @param left_annotation Passed to \code{\link[ComplexHeatmap]{Heatmap}},
+#' overrides `anno_rows`.
+#' @param top_annotation Passed to \code{\link[ComplexHeatmap]{Heatmap}},
+#' overrides `anno_columns`.
+#' @param ... Passed to `ComplexHeatmap` (see
+#' \code{\link[ComplexHeatmap]{Heatmap}})
 #'
 #' @return A \code{\link[ComplexHeatmap]{Heatmap}}
 #' @export
 #' @import SummarizedExperiment
-#' @importFrom SEtools sechm
-#' @importFrom ComplexHeatmap draw
+#' @importFrom ComplexHeatmap draw Heatmap HeatmapAnnotation rowAnnotation
 #'
 #' @examples
 #' data(example_bin_se)
@@ -27,8 +40,10 @@ geneBinHeatmap <- function(se, gene,
                            what=c("logNormDensity", "logCPM", "scaledLogCPM"),
                            anno_rows=c("type","logWidth","meanLogDensity",
                                        "log10PValue","geneAmbiguous"),
-                           anno_colors=list(), removeAmbiguous=FALSE,
-                           merge_legends=TRUE, ...){
+                           anno_columns=c(), anno_colors=list(),
+                           removeAmbiguous=FALSE, merge_legends=TRUE,
+                           cluster_columns=FALSE,
+                           left_annotation=NULL, top_annotation=NULL, ...){
   se <- .checkSE(se, checkNorm=TRUE)
   if(length(w <- .matchGene(se, gene))==0) stop("Gene not found!")
   se <- sort(se[w,])
@@ -40,12 +55,23 @@ geneBinHeatmap <- function(se, gene,
   if("type" %in% anno_rows && is.null(anno_colors$type))
     anno_colors$type <- .typeColors()
   if(removeAmbiguous | !any(rowData(se)$geneAmbiguous))
-    anno_rows <- setdiff(anno_rows, "geneAmbiguous")
-  h <- sechm(se, row.names(se), do.scale=what=="scaledLogCPM",
-             show_rownames=FALSE, sortRowsOn=NULL, cluster_rows=FALSE,
-             row_title=paste(gene, "bins"), anno_rows=anno_rows,
-             assayName=ifelse(what=="logNormDensity",what,"logcpm"),
-             anno_colors=anno_colors, ...)
+    anno_rows <- intersect(setdiff(anno_rows, "geneAmbiguous"),
+                           colnames(rowData(se)))
+  if(is.null(left_annotation) && !is.null(anno_rows)){
+    left_annotation <- rowAnnotation(
+      df=as.data.frame(rowData(se)[,anno_rows,drop=FALSE]),
+      col=anno_colors[intersect(names(anno_colors),anno_rows)])
+  }
+  if(is.null(top_annotation) && !is.null(anno_columns)){
+    top_annotation <- HeatmapAnnotation(
+      df=as.data.frame(colData(se)[,anno_columns,drop=FALSE]),
+      col=anno_colors[intersect(names(anno_colors),anno_rows)])
+  }
+  x <- assays(se)[[ifelse(what=="logNormDensity",what,"logcpm")]]
+  if(what=="scaledLogCPM") x <- t(scale(t(x)))
+  h <- Heatmap(x, name=what, show_row_names=FALSE, cluster_rows=FALSE,
+          cluster_columns=cluster_columns, row_title=paste(gene, "bins"),
+          top_annotation=top_annotation, left_annotation=left_annotation, ...)
   if(merge_legends) return(draw(h, merge_legends=TRUE))
   h
 }

@@ -21,7 +21,7 @@
 #' bins <- prepareBins(example_gene_annotation)
 #' bam_files <- list.files(system.file("extdata", package="diffUTR"),
 #'                         pattern="bam$", full=TRUE)
-#' se <- countFeatures(bam_files, bins, isPairedEnd=TRUE)
+#' se <- countFeatures(bam_files, bins)
 #' se
 countFeatures <- function(bamfiles, bins, strandSpecific=0, readLength=50L,
                           allowMultiOverlap=TRUE, inclNormalized=TRUE,
