@@ -1,4 +1,4 @@
-#' simes.aggregation
+#' simesAggregation
 #'
 #' Simes p-value correction and aggregation, adapted from
 #' \code{link[limma]{diffSplice}}
@@ -12,8 +12,8 @@
 #' @examples
 #' p <- runif(50)
 #' genes <- sample(LETTERS,50,replace=TRUE)
-#' simes.aggregation(p, genes)
-simes.aggregation <- function(p.value, geneid){
+#' simesAggregation(p, genes)
+simesAggregation <- function(p.value, geneid){
   stopifnot(is.numeric(p.value))
   stopifnot(length(p.value)==length(geneid))
   o <- order(geneid)
@@ -96,7 +96,7 @@ geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL,
 .geneLevelStats <- function(d, gene.qval=NULL){
   stopifnot(c("bin.pval","coef","gene","width","meanLogDensity") %in%
               colnames(d))
-  if(is.null(gene.qval)) gene.qval <- simes.aggregation(d$bin.pval, d$gene)
+  if(is.null(gene.qval)) gene.qval <- simesAggregation(d$bin.pval, d$gene)
   si <- split(seq_len(nrow(d)), d$gene)
   d2 <- data.frame( row.names=names(si))
   d$log10p <- -log10(d$bin.pval)
