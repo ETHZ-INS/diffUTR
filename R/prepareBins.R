@@ -6,7 +6,7 @@
 #' containing the alternative poly-A site database
 #' @param onlyMainChr Logical; whether to keep only main chromosomes
 #' @param removeAntisense Logical; whether to remove antisense APA sites
-#' @param chrStyle Chromosome notation to convert to, default "UCSC"
+#' @param chrStyle Chromosome notation to convert to (default no conversion)
 #' @param maxUTRbinSize Max width of new alternative UTR bins
 #' @param genewise Logical, whether annotation should be flattened genewise
 #' @param stranded Logical, whether to perform disjoin in a stranded fashion.
@@ -26,7 +26,7 @@
 #' data(example_gene_annotation)
 #' bins <- prepareBins(example_gene_annotation)
 prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
-                         chrStyle="UCSC", maxUTRbinSize=15000,
+                         chrStyle=NULL, maxUTRbinSize=15000,
                          codingOnly=FALSE,
                          genewise=FALSE, stranded=FALSE, verbose=TRUE ){
 
@@ -40,12 +40,15 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
     if(!is.null(APA))
       APA <- keepStandardChromosomes(APA, pruning.mode="coarse")
   }
-  seqlevelsStyle(g) <- chrStyle
+  if(!is.null(chrStyle)) seqlevelsStyle(g) <- chrStyle
   seqlevels(g) <- seqlevelsInUse(g)
 
   if(!is.null(APA)){
     if(verbose) message("Generating alternative UTR bins")
-    seqlevelsStyle(APA) <- chrStyle
+    if(is.null(intersect(seqlevels(APA),seqlevels(g)))) 
+      stop("There are no chromosome in common between `g` and `APA`. Consider",
+           " using the `chrStyle` argument to force a notation.")
+    if(!is.null(chrStyle)) seqlevelsStyle(APA) <- chrStyle
     seqlevels(APA) <- seqlevelsInUse(APA)
     g <- .extendWithAPA(g, APA)
   }
@@ -218,6 +221,7 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   apa
 }
 
+#' @importFrom GenomicRanges width
 #' @importFrom IRanges IRanges
 .extendWithAPA <- function(g, APA, maxUTRbinSize=15000){
   # get regions which could be boundrys for bins
@@ -269,7 +273,7 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   a <- c(plusbin,minusbin)
   a$type<-"UTR"
   #threshold
-  a <- a[width(a)<maxUTRbinSize,]
+  a <- a[GenomicRanges::width(a)<maxUTRbinSize,]
 
   b <- GenomicRanges::setdiff(g[g$type=="exon"], g[g$type=="CDS"])
 

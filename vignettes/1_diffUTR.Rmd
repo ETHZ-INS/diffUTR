@@ -227,6 +227,11 @@ If there is no APA sites database that includes your species of interest, you
 can still perform differential UTR analysis, however you will be limited to 
 bins defined by the UTRs ends included in the gene annotation.
 
+Note that if the gene annotation and the APA sites use different chromosome 
+notation styles, you can enforce a given notation using the `chrStyle` argument
+of `prepareBins`. Beware however that there is no internal check that the genome
+builds match -- be sure that they do!
+
 For the purpose of this example, we'll just use the same `bins` as in the first
  example.
 

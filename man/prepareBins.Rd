@@ -9,7 +9,7 @@ prepareBins(
   APA = NULL,
   onlyMainChr = TRUE,
   removeAntisense = TRUE,
-  chrStyle = "UCSC",
+  chrStyle = NULL,
   maxUTRbinSize = 15000,
   codingOnly = FALSE,
   genewise = FALSE,
@@ -28,7 +28,7 @@ containing the alternative poly-A site database}
 
 \item{removeAntisense}{Logical; whether to remove antisense APA sites}
 
-\item{chrStyle}{Chromosome notation to convert to, default "UCSC"}
+\item{chrStyle}{Chromosome notation to convert to (default no conversion)}
 
 \item{maxUTRbinSize}{Max width of new alternative UTR bins}
 
