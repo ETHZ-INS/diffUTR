@@ -96,13 +96,15 @@ geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL,
 .geneLevelStats <- function(d, gene.qval=NULL){
   stopifnot(c("bin.pval","coef","gene","width","meanLogDensity") %in%
               colnames(d))
+  d$bin.pval[is.na(d$bin.pval)] <- 1
   if(is.null(gene.qval)) gene.qval <- simesAggregation(d$bin.pval, d$gene)
+  if(is.factor(d$gene)) d$gene <- droplevels(d$gene)
   si <- split(seq_len(nrow(d)), d$gene)
   d2 <- data.frame( row.names=names(si))
   d$log10p <- -log10(d$bin.pval)
   d2 <- vapply( si, FUN.VALUE=numeric(8), FUN=function(i){
     w <- d$log10p[i]
-    if(sum(w)==0) w <- rep(1,length(i))
+    if(sum(w,na.rm=TRUE)==0) w <- rep(1,length(i))
     c( w.coef=weighted.mean(d$coef[i], w),
        w.abs.coef=weighted.mean(abs(d$coef[i]), w),
        w.width=sum(d$width[i]*w)/sum(w),
