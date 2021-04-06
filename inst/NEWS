@@ -1,3 +1,7 @@
+Changes in version 0.99.27 (2021-04-06)
++ major speed-up or gene-level calculations
++ fixed bug using the wrong default coefficient with DEXSeq
+
 Changes in version 0.99.13 (2021-03-04)
 + fixed misnamed variable bug when creating annotation from ensembldb
 + formatting and renaming changes to conform with Bioc standards
