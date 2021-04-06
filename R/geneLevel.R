@@ -87,7 +87,7 @@ geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL,
   }
 
   metadata(se)$geneLevel <- .geneLevelStats(DataFrame(
-    bin.pval=rd$bin.p.value, coef=rd[[coef]], width=width(se),
+    bin.pval=rd$bin.p.value, coef=rd[[coef]], width=GenomicRanges::width(se),
     gene=rd$gene, gene_name=rd$gene_name, meanLogDensity=rd$meanLogDensity))
 
   if(!returnSE) return(metadata(se)$geneLevel)
@@ -95,7 +95,6 @@ geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL,
 }
 
 #' @importFrom methods is as
-#' @importFrom BiocParallel bpnworkers
 #' @importFrom IRanges LogicalList NumericList IntegerList
 .geneLevelStats <- function(d, gene.qval=NULL){
   stopifnot(c("bin.pval","coef","gene","width","meanLogDensity") %in%

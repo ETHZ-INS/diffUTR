@@ -31,13 +31,14 @@
 #' @export
 #' @import SummarizedExperiment
 #' @importFrom ComplexHeatmap draw Heatmap HeatmapAnnotation rowAnnotation
+#' @importFrom viridisLite viridis
 #'
 #' @examples
 #' data(example_bin_se)
 #' se <- diffSpliceWrapper(example_bin_se, ~condition)
 #' geneBinHeatmap(se, "Jund")
 geneBinHeatmap <- function(se, gene,
-                           what=c("logNormDensity", "logCPM", "scaledLogCPM"),
+                           what=NULL,
                            anno_rows=c("type","logWidth","meanLogDensity",
                                        "log10PValue","geneAmbiguous"),
                            anno_columns=c(), anno_colors=list(),
@@ -48,7 +49,23 @@ geneBinHeatmap <- function(se, gene,
   if(length(w <- .matchGene(se, gene))==0) stop("Gene not found!")
   se <- sort(se[w,])
   if(removeAmbiguous) se <- se[!rowData(se)$geneAmbiguous,]
-  what <- match.arg(what)
+  if(is.null(what)){
+    h1 <- geneBinHeatmap(se, gene, "logNormDensity", anno_rows=anno_rows,
+                         anno_columns=anno_columns, anno_colors=anno_colors,
+                         removeAmbiguous=removeAmbiguous, merge_legends=FALSE,
+                         left_annotation=left_annotation, col=viridis(20),
+                         column_title="logNormDensity",
+                         top_annotation=top_annotation, ...)
+    h2 <- geneBinHeatmap(se, gene, "scaledLogCPM", anno_rows=c(),
+                         anno_columns=anno_columns, anno_colors=anno_colors,
+                         removeAmbiguous=removeAmbiguous, merge_legends=FALSE,
+                         column_title="scaledLogCPM",
+                         top_annotation=top_annotation, ...)
+    if(merge_legends) return(draw(h1+h2, merge_legends=TRUE))
+    return(h1+h2)
+  }else{
+    what <- match.arg(what, c("logNormDensity", "logCPM", "scaledLogCPM"))
+  }
   if("log10PValue" %in% anno_rows &&
      !("log10PValue" %in% colnames(rowData(se))))
     rowData(se)[["log10PValue"]] <- -log10(rowData(se)$bin.p.value)
@@ -57,7 +74,7 @@ geneBinHeatmap <- function(se, gene,
   if(removeAmbiguous | !any(rowData(se)$geneAmbiguous))
     anno_rows <- intersect(setdiff(anno_rows, "geneAmbiguous"),
                            colnames(rowData(se)))
-  if(is.null(left_annotation) && !is.null(anno_rows)){
+  if(is.null(left_annotation) && length(anno_rows)>0){
     left_annotation <- rowAnnotation(
       df=as.data.frame(rowData(se)[,anno_rows,drop=FALSE]),
       col=anno_colors[intersect(names(anno_colors),anno_rows)])
@@ -244,7 +261,7 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
                  aes_string(x="x_start", xend="x_end", y=y, yend=y, size=size,
                             colour=colour)) +
     theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
-    ggtitle(gene) + xlab(xlab) +
+    ggtitle(paste0(gene, " (", as.character(strand(se)[1]),")")) + xlab(xlab) +
     ylab(ifelse(y=="geneNormDensity","Gene-normalized logDensity",y))
 }
 

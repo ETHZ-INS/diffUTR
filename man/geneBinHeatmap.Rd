@@ -7,7 +7,7 @@
 geneBinHeatmap(
   se,
   gene,
-  what = c("logNormDensity", "logCPM", "scaledLogCPM"),
+  what = NULL,
   anno_rows = c("type", "logWidth", "meanLogDensity", "log10PValue", "geneAmbiguous"),
   anno_columns = c(),
   anno_colors = list(),
