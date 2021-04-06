@@ -95,7 +95,7 @@ geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL,
 }
 
 #' @importFrom methods is as
-#' @importFrom IRanges LogicalList NumericList IntegerList
+#' @importFrom IRanges LogicalList NumericList IntegerList mean
 .geneLevelStats <- function(d, gene.qval=NULL){
   stopifnot(c("bin.pval","coef","gene","width","meanLogDensity") %in%
               colnames(d))
@@ -114,14 +114,14 @@ geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL,
   de <- NumericList(split(d$meanLogDensity, d$gene))
   d2 <- data.frame( row.names = names(co),
                     nb.bins = lengths(co),
-                    w.coef=IRanges::sum(w*co),
-                    w.abs.coef=IRanges::sum(w*abs(co)),
-                    w.width=IRanges::sum(w*wi),
-                    w.density=log2(IRanges::sum(w*de)),
-                    sizeScore=sum(wi/IRanges::sum(wi)*w*abs(co)),
-                    abs.sizeScore=IRanges::sum(wi/IRanges::sum(wi)*w*co),
-                    geneMeanDensity=IRanges::mean(de,trim=0.05, na.rm=TRUE) )
-  d2$density.ratio <- IRanges::sum(w*(de-d2$geneMeanDensity))
+                    w.coef=sum(w*co),
+                    w.abs.coef=sum(w*abs(co)),
+                    w.width=sum(w*wi),
+                    w.density=log2(sum(w*de)),
+                    sizeScore=sum(wi/sum(wi)*w*abs(co)),
+                    abs.sizeScore=sum(wi/sum(wi)*w*co),
+                    geneMeanDensity=mean(de,trim=0.05, na.rm=TRUE) )
+  d2$density.ratio <- sum(w*(de-d2$geneMeanDensity))
 
   for(f in c(1:2,5:8)) d2[,f] <- round(d2[,f],3)
   d2$w.width <- as.integer(round(d2$w.width))
