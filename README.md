@@ -2,7 +2,7 @@
 
 ## Streamlining differential exon and 3' UTR usage analysis
 
-The _diffUTR_ R package streamlines differential exon usage (DEU) analyses, and leverages existing DEU tools and alternative poly-adenylation site databases to enable differential 3' UTR usage analysis ([Gerber et al., preprint](https://doi.org/10.1101/2021.02.12.430963)) . 
+The _diffUTR_ R package streamlines differential exon usage (DEU) analyses, and leverages existing DEU tools and alternative poly-adenylation site databases to enable differential 3' UTR usage analysis ([Gerber et al., 2021](https://doi.org/10.1186/s12859-021-04114-7)) . 
 
 <img src="inst/docs/figure1.svg" alt="diffUTR scheme" style="margin-top: 15px; margin-bottom: 15px;" />
 
