@@ -64,7 +64,8 @@ of the original \code{\link[limma]{diffSplice}} (default TRUE).}
 \item{reducedModel}{A reduced formula (applicable only to `DEXSeqWrapper`).}
 
 \item{...}{Further arguments (passed to `testForDEU` and
-`estimateExonFoldChanges`)}
+`estimateExonFoldChanges`) of `DEXSeq`. Can for instance be used to enable 
+multithreading, by passing `BPPARAM=BiocParallel::MulticoreParam(ncores)`.}
 }
 \value{
 The `se` object with additional rowData columns contain bin (i.e.

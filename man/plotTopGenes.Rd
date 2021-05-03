@@ -4,7 +4,7 @@
 \alias{plotTopGenes}
 \title{plotTopGenes}
 \usage{
-plotTopGenes(se, n = 25, FDR = 0.05, diffUTR = FALSE, alpha = 1, ...)
+plotTopGenes(se, n = 10, FDR = 0.05, diffUTR = FALSE, alpha = 1, ...)
 }
 \arguments{
 \item{se}{A bin-wise SummarizedExperiment as produced by
@@ -23,6 +23,10 @@ scores (i.e. larger bins have more weight) -- this is relevant only when
 testing UTR usage.}
 
 \item{alpha}{Points transparency}
+
+\item{...}{Passed to \link[ggrepel]{geom_label_repel}; this can for instance
+be used to increase `max.overlaps` when not all desired gene labels are 
+displayed)}
 }
 \value{
 A ggplot

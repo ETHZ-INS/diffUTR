@@ -9,7 +9,8 @@ package: diffUTR
 output:
   BiocStyle::html_document
 abstract: |
-  Showcases the use of the diffUTR package for streamlining analyses of differential exon usage and differential 3' UTR usage.
+  Showcases the use of the diffUTR package for streamlining analyses of 
+  differential exon usage and differential 3' UTR usage.
 vignette: |
   %\VignetteIndexEntry{1_diffUTR}
   %\VignetteEngine{knitr::rmarkdown}
@@ -38,7 +39,8 @@ and produce highly similar outputs, so that they can all be used with the same
 downstream plotting functions (Figure 1A).
 
 Based on various benchmarks (e.g. 
-[Sonenson et al. 2016](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0862-3)), 
+[Sonenson et al. 2016](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0862-3);
+see also [our paper](https://doi.org/10.1186/s12859-021-04114-7)), 
 `r BiocStyle::Biocpkg("DEXSeq")` is the most accurate of the three methods, 
 and should therefore be the method of choice. It is however very slow and does 
 not scale well to larger sample sizes. We therefore suggest our improved 
@@ -189,27 +191,10 @@ head(perGene)
 
 The results are described in more detail below.
 
-## UTR- and CDS-specific analyses
-
-By default, the above workflow detects differences in bin usage, whether these
-are from coding sequences (CDS) or untranslated regions (UTR). To looks 
-specifically for one or the other, it is not necessary to re-run the wrappers,
-but simply to perform the gene-level aggregation using different filters. This 
-can be done using the `geneLevelStats()` function, which accepts the arguments 
-`excludeTypes` and `includeTypes` to decide which bin types to include in the 
-gene-level estimates. For example:
-
-```{r}
-# only look for changes in CDS bins:
-cds <- geneLevelStats(rse, includeTypes="CDS", returnSE=FALSE)
-head(cds)
-# only look for changes in UTR bins:
-utr <- geneLevelStats(rse, includeTypes="UTR", returnSE=FALSE)
-# only look for changes in bins that _could be_ UTRs:
-utr <- geneLevelStats(rse, excludeTypes=c("CDS","non-coding"), returnSE=FALSE)
-```
-
 <br/><br/>
+
+
+# Workflow for differential 3' UTR usage analysis
 
 ## Obtaining alternative poly-adenlyation sites and preparing the bins
 
@@ -263,20 +248,31 @@ bamfiles <- c("path/to/sample1.bam", "path/to/sample2.bam", ...)
 se <- countFeatures(bamfiles, bins, strandSpecific=2, nthreads=6, isPairedEnd=TRUE)
 ```
 
-Differential analysis also works in the same way. By default, this will look 
-for changes in _any_ bin type; if you want to restrict the gene-level 
-aggregation to UTR bins, you can use:
+Differential analysis also works in the same way as for DEU:
 
 ```{r}
-rse <- diffSpliceWrapper(rse, design = ~condition, excludeTypes = c("CDS","non-coding"))
+rse <- diffSpliceWrapper( rse, design = ~condition )
 ```
 
-See also `?geneLevelStats` for more options.
+By default, this will look for changes in _any_ bin type. To look specifically 
+for changes in certain types of bins, you can perform the gene-level 
+aggregation using different filters. This can be done using the 
+`geneLevelStats()` function, which accepts the arguments `excludeTypes` and 
+`includeTypes` to decide which bin types to include in the gene-level estimates.
+For example:
+
+```{r}
+# we can then only look for changes in CDS bins:
+cds <- geneLevelStats(rse, includeTypes="CDS", returnSE=FALSE)
+head(cds)
+# or only look for changes in UTR bins:
+utr <- geneLevelStats(rse, includeTypes="UTR", returnSE=FALSE)
+head(utr)
+# or only look for changes in bins that _could be_ UTRs:
+# geneLevelStats(rse, excludeTypes=c("CDS","non-coding"), returnSE=FALSE)
+```
 
 <br/><br/>
-
-# Workflow for differential 3' UTR usage analysis
-
 
 # Exploring the results
 
@@ -302,26 +298,29 @@ genes, and the colour the relative expression of the significant bins with
 respect to the gene (density ratio). This enables the rapid identification of 
 changes occuring in highly-expressed genes, as well as discount changes 
 happening in bins which tend not to be included in transcripts from that gene 
-(low density ratio).
+(low density ratio). Note that it is possible to use filter by density ratio 
+during gene-level aggregation (see `?geneLevelStats`).
 
 The product is a `ggplot` object, and can be manipulated as such.
 
-By default, the gene-level statistics computed use all bin types. However, for 
-the purpose of differential 3' UTR analysis, it is useful to restrict exclude 
-coding sequence (CDS) bins (keeping bins that could be both) or limit 
-ourselves to 3' UTR bins. This can be done by recomputing the gene-level 
-statistics as follows:
+By default, the gene-level statistics computed use all bin types. However, 
+`plotTopGenes` also accepts directly the gene-level stats, as outputted by
+`geneLevelStats` (see above), enabling the visualization of top genes 
+separately for CDS and UTRs, for instance:
 
 ```{r}
-rse <- geneLevelStats(rse, includeTypes="3UTR")
+# `utr` being the output of the above
+# geneLevelStats(rse, includeTypes="UTR", returnSE=FALSE)
+plotTopGenes(utr, diffUTR = TRUE)
 ```
 
-We can then plot again the top genes, indicating that we are in differential 
-UTR mode, which will use signed and width-weighted aggregation:
+Here we also indicated that we are in differential UTR mode, to use signed and
+width-weighted aggregation.
 
-```{r}
-plotTopGenes(rse, diffUTR = TRUE)
-```
+Note that when there are too many gene labels to be plotted nearby, `ggrepel` 
+will omit them and produce the warning above. To plot them nevertheless, you
+can pass the argument `max.overlaps` with a higher value (see 
+`?ggrepel::geom_text_repel`).
 
 
 ## Gene profiles
@@ -369,9 +368,11 @@ are none).
 We found these representations particularly useful to prioritize candidates 
 from differential bin usage analyses. For example, many genes show differential 
 usage of bins which are generally not included in most transcripts of that gene
- (low count density), and are therefore less likely to be relevant. On the other
- hand, some genes show massive expression of a single bin which might (or might
- not) represent a different, unannotated transcript.
+(low count density), and are therefore less likely to be relevant (note that 
+it is possible to use filter by density ratio during gene-level aggregation --
+see `?geneLevelStats`). On the other hand, some genes show massive expression 
+of a single bin which might (or might not) represent a different, unannotated 
+transcript.
 
 ### Overlaying with transcripts
 

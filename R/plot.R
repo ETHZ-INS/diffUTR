@@ -283,6 +283,9 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
 #' scores (i.e. larger bins have more weight) -- this is relevant only when
 #' testing UTR usage.
 #' @param alpha Points transparency
+#' @param ... Passed to \link[ggrepel]{geom_label_repel}; this can for instance
+#' be used to increase `max.overlaps` when not all desired gene labels are 
+#' displayed)
 #'
 #' @return A ggplot
 #' @export
@@ -294,7 +297,7 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
 #' data(example_bin_se)
 #' se <- diffSpliceWrapper(example_bin_se, ~condition)
 #' plotTopGenes(se)
-plotTopGenes <- function(se, n=25, FDR=0.05, diffUTR=FALSE, alpha=1, ...){
+plotTopGenes <- function(se, n=10, FDR=0.05, diffUTR=FALSE, alpha=1, ...){
   if(is(se, "SummarizedExperiment")){
     se <- .checkSE(se, requireStats=TRUE)
     se <- metadata(se)$geneLevel
