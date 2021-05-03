@@ -2,7 +2,7 @@
 
 ## Streamlining differential exon and 3' UTR usage analysis
 
-The _diffUTR_ R package streamlines differential exon usage (DEU) analyses, and leverages existing DEU tools and alternative poly-adenylation site databases to enable differential 3' UTR usage analysis ([Gerber et al., preprint](https://doi.org/10.1101/2021.02.12.430963)) . 
+The _diffUTR_ R package streamlines differential exon usage (DEU) analyses, and leverages existing DEU tools and alternative poly-adenylation site databases to enable differential 3' UTR usage analysis ([Gerber et al., 2021](https://doi.org/10.1186/s12859-021-04114-7)) . 
 
 <img src="inst/docs/figure1.svg" alt="diffUTR scheme" style="margin-top: 15px; margin-bottom: 15px;" />
 
@@ -10,7 +10,7 @@ Popular bin-based DEU methods are provided by the [limma](https://bioconductor.o
 
 In addition, _diffUTR_ allows the extension of the DEU framework to UTR usage. A chief difficulty here is that most UTR variants are not catalogued in standard transcript annotations, limiting the utility of standard transcript-level quantification based on reference transcripts. However, based on databases of poly-adenylation (APA) sites such as [polyASite](https://polyasite.unibas.ch), _diffUTR_ can use alternative APA sites to further segment and extend UTR bins, as illustrated in Figure 1B.
 
-In this way, _diffUTR_ outperforms alternative methods for detecting UTR changes from standard transcriptomics (see the [paper](https://doi.org/10.1101/2021.02.12.430963) for more details) :
+In this way, _diffUTR_ outperforms alternative methods for detecting UTR changes from standard transcriptomics (see the [paper](https://doi.org/10.1186/s12859-021-04114-7) for more details) :
 
 <img src="inst/docs/benchmark.png" alt="Differential UTR usage benchmark" width="600px" style="margin-top: 10px; margin-bottom: 15px;" />
 
