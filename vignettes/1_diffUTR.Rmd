@@ -189,9 +189,27 @@ head(perGene)
 
 The results are described in more detail below.
 
-<br/><br/>
+## UTR- and CDS-specific analyses
 
-# Workflow for differential 3' UTR usage analysis
+By default, the above workflow detects differences in bin usage, whether these
+are from coding sequences (CDS) or untranslated regions (UTR). To looks 
+specifically for one or the other, it is not necessary to re-run the wrappers,
+but simply to perform the gene-level aggregation using different filters. This 
+can be done using the `geneLevelStats()` function, which accepts the arguments 
+`excludeTypes` and `includeTypes` to decide which bin types to include in the 
+gene-level estimates. For example:
+
+```{r}
+# only look for changes in CDS bins:
+cds <- geneLevelStats(rse, includeTypes="CDS", returnSE=FALSE)
+head(cds)
+# only look for changes in UTR bins:
+utr <- geneLevelStats(rse, includeTypes="UTR", returnSE=FALSE)
+# only look for changes in bins that _could be_ UTRs:
+utr <- geneLevelStats(rse, excludeTypes=c("CDS","non-coding"), returnSE=FALSE)
+```
+
+<br/><br/>
 
 ## Obtaining alternative poly-adenlyation sites and preparing the bins
 
@@ -256,6 +274,9 @@ rse <- diffSpliceWrapper(rse, design = ~condition, excludeTypes = c("CDS","non-c
 See also `?geneLevelStats` for more options.
 
 <br/><br/>
+
+# Workflow for differential 3' UTR usage analysis
+
 
 # Exploring the results
 
