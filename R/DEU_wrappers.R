@@ -76,13 +76,7 @@ diffSpliceDGEWrapper <- function(se, design, coef=NULL, QLF=TRUE, robust=TRUE,
   if(!is.null(excludeTypes)) ep[rowData(se)$type %in% excludeTypes] <- 1
   rowData(se)$bin.FDR <- p.adjust(ep)
 
-  d <- DataFrame(bin.pval=ep, coef=rowData(se)$coefficient,
-                 gene=rowData(se)$gene, width=width(se),
-                 meanLogDensity=rowData(se)$meanLogDensity)
-  if("gene_name" %in% colnames(rowData(se)))
-    d$gene_name <- rowData(se)$gene_name
-  metadata(se)$geneLevel <- .geneLevelStats(d=d)
-  se
+  geneLevelStats(se, coef="coefficient", excludeTypes=excludeTypes)
 }
 
 #' @param improved Logical; whether to use \code{\link{diffSplice2}} instead
@@ -141,7 +135,8 @@ diffSpliceWrapper <- function(se, design, coef=NULL, robust=TRUE,
 }
 
 #' @param ... Further arguments (passed to `testForDEU` and
-#' `estimateExonFoldChanges`)
+#' `estimateExonFoldChanges`) of `DEXSeq`. Can for instance be used to enable 
+#' multithreading, by passing `BPPARAM=BiocParallel::MulticoreParam(ncores)`.
 #' @importFrom DEXSeq DEXSeqDataSet estimateSizeFactors estimateDispersions
 #' @importFrom DEXSeq estimateExonFoldChanges DEXSeqResults perGeneQValue
 #' @importFrom DEXSeq testForDEU
@@ -168,7 +163,7 @@ DEXSeqWrapper <- function(se, design=~sample+exon+condition:exon,
   dds <- estimateExonFoldChanges( dds, fitExpToVar=vars, ... )
   res <- DEXSeqResults( dds )
 
-  rowData(se)$log2fc <- res[[grep("log2fold",names(res))]]
+  rowData(se)$log2fc <- res[[rev(grep("log2fold",names(res)))[1]]]
   rowData(se)$exonBaseMean <- res$exonBaseMean
   rowData(se)$bin.p.value <- res$pvalue
 
@@ -176,12 +171,15 @@ DEXSeqWrapper <- function(se, design=~sample+exon+condition:exon,
     res$pvalue[rowData(se)$type %in% excludeTypes] <- 1
   rowData(se)$bin.FDR <- p.adjust(res$pvalue)
 
+  message("Generating gene-level stats...")
+
   d <- DataFrame(bin.pval=res$pvalue, coef=rowData(se)$log2fc,
                  gene=rowData(se)$gene, width=width(se),
-                 meanLogDensity=rowData(se)$meanLogDensity)
+                 meanLogDensity=rowData(se)$meanLogDensity,
+                 logDensityRatio=rowData(se)$logDensityRatio)
   if("gene_name" %in% colnames(rowData(se)))
     d$gene_name <- rowData(se)$gene_name
-  message("Generating gene-level stats...")
+  
   metadata(se)$geneLevel <- .geneLevelStats(d=d, gene.qval=perGeneQValue(res))
   se
 }
