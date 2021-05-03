@@ -360,7 +360,7 @@ not included in the `diffUTR` package so as to keep dependencies low, the
 function below would be one way of using this with `rse` objects from `diffUTR` 
 as well as the `EnsDb` object used to create the bins:
 
-```{r, eval=FALSE}
+```{r}
 #' binTxPlot
 #'
 #' @param se A bin-wise SummarizedExperiment as produced by
@@ -377,7 +377,7 @@ as well as the `EnsDb` object used to create the bins:
 #' @param ... Passed to `plotRangesLinkedToData`
 #'
 #' @return A `ggbio` `Tracks`
-#' @importFrom AnnotationDbi GeneNameFilter GeneIdFilter
+#' @importFrom AnnotationFilter GeneNameFilter GeneIdFilter
 #' @importFrom ensembldb getGeneRegionTrackForGviz
 #' @importFrom ggbio plotRangesLinkedToData autoplot
 #' @export
@@ -410,8 +410,8 @@ binTxPlot <- function(se, ensdb, gene, by=NULL, assayName=c("logNormDensity"),
                                 size=size, ...) + ggtitle(gene)
 }
 
-# example usage:
-binTxPlot(rse, ensdb, gene="Arid5a", by="condition")
+# example usage (not run):
+# binTxPlot(rse, ensdb, gene="Arid5a", by="condition")
 ```
 
 (Additionally requires the `r BiocStyle::Biocpkg("ggbio")` package)
