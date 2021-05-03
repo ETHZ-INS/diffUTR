@@ -1,0 +1,13 @@
+bibentry(bibtype = "article",
+	title = "Streamlining differential exon and 3′ UTR usage with {diffUTR}",
+	author = c(
+	    person("Stefan", "Gerber"),
+	    person("Gerhard", "Schratt"),
+	    person("Pierre-Luc", "Germain")),
+	year = 2021,
+	note = paste("package version", meta$Version),
+	doi = "10.1186/s12859-021-04114-7",
+	volume = 22,
+	issue = 189,
+	journal = "BMC Bioinformatics"
+)
