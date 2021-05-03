@@ -137,14 +137,7 @@ diffSpliceWrapper <- function(se, design, coef=NULL, robust=TRUE,
   rowData(se) <- tmp
   rowData(se)$bin.FDR <- p.adjust(ep)
 
-  if(!is.null(excludeTypes)) ep[rowData(se)$type %in% excludeTypes] <- 1
-  d <- DataFrame(bin.pval=ep, coef=rowData(se)$coefficient,
-                 gene=rowData(se)$gene, width=width(se),
-                 meanLogDensity=rowData(se)$meanLogDensity)
-  if("gene_name" %in% colnames(rowData(se)))
-    d$gene_name <- rowData(se)$gene_name
-  metadata(se)$geneLevel <- .geneLevelStats(d=d)
-  se
+  geneLevelStats(se, coef="coefficient", excludeTypes=excludeTypes)
 }
 
 #' @param ... Further arguments (passed to `testForDEU` and

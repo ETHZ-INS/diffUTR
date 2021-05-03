@@ -16,7 +16,8 @@ deuBinPlot(
   lineSize = 1,
   colour = NULL,
   alpha = NULL,
-  removeAmbiguous = TRUE
+  removeAmbiguous = TRUE,
+  minDensityRatio = 0.1
 )
 }
 \arguments{

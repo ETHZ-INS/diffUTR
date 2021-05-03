@@ -57,6 +57,8 @@ countFeatures <- function(bamfiles, bins, strandSpecific=0, readLength=50L,
   rowData(se)$meanLogCPM <- rowMeans(assays(se)$logcpm)
   rowData(se)$logWidth <- log1p(width(se))
   rowData(se)$meanLogDensity <- rowMeans(assays(se)$logNormDensity)
+  rowData(se)$logDensityRatio <- 
+    log(.getDensityRatio(rowData(se)$meanLogDensity, rowData(se)$gene))
   colData(se)$assigned <- as.numeric(hits$stat[1,-1,drop=FALSE])
   colData(se)$unassigned <- colSums(hits$stat[-1,-1,drop=FALSE])
   if(!inclNormalized) assays(se) <- assays(se)[1]

@@ -14,6 +14,7 @@ geneBinHeatmap(
   removeAmbiguous = FALSE,
   merge_legends = TRUE,
   cluster_columns = FALSE,
+  minDensityRatio = 0.1,
   left_annotation = NULL,
   top_annotation = NULL,
   ...

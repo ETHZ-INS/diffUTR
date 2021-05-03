@@ -373,6 +373,70 @@ usage of bins which are generally not included in most transcripts of that gene
  hand, some genes show massive expression of a single bin which might (or might
  not) represent a different, unannotated transcript.
 
+### Overlaying with transcripts
+
+The `r BiocStyle::Biocpkg("ggbio")` package has functionalities enabling to plot
+bin-level information along side transcript tracks. While wrappers for this are 
+not included in the `diffUTR` package so as to keep dependencies low, the 
+function below would be one way of using this with `rse` objects from `diffUTR` 
+as well as the `EnsDb` object used to create the bins:
+
+```{r}
+#' binTxPlot
+#'
+#' @param se A bin-wise SummarizedExperiment as produced by
+#' \code{\link{countFeatures}} and including bin-level tests (i.e. having been
+#' passed through one of the DEU wrappers such as
+#' \code{\link{diffSpliceWrapper}} or \code{\link{DEXSeqWrapper}})
+#' @param ensdb The `EnsDb` which was used to create the bins
+#' @param gene The gene of interest
+#' @param by The colData column of `se` used to split the samples
+#' @param assayName The assay to plot
+#' @param removeAmbiguous Logical; whether to remove bins that are
+#' gene-ambiguous (i.e. overlap multiple genes).
+#' @param size Size of the lines
+#' @param ... Passed to `plotRangesLinkedToData`
+#'
+#' @return A `ggbio` `Tracks`
+#' @importFrom AnnotationFilter GeneNameFilter GeneIdFilter
+#' @importFrom ensembldb getGeneRegionTrackForGviz
+#' @importFrom ggbio plotRangesLinkedToData autoplot
+#' @export
+binTxPlot <- function(se, ensdb, gene, by=NULL, assayName=c("logNormDensity"),
+                      removeAmbiguous=TRUE, size=3, threshold=0.05, ...){
+  w <- diffUTR:::.matchGene(se, gene)
+  se <- sort(se[w,])
+  if(removeAmbiguous) se <- se[!rowData(se)$geneAmbiguous,]
+  if(length(w)==0) return(NULL)
+  if(!is.null(by)) by <- match.arg(by, colnames(colData(se)))
+  assayName <- match.arg(assayName, assayNames(se))
+  if(rowData(se)$gene[[1]]==gene){
+    filt <- GeneIdFilter(gene)
+  }else{
+    filt <- GeneNameFilter(gene)
+  }
+  gr <- ggbio::autoplot(ensdb, filt)
+  gr2 <- rowRanges(se)
+  if(!is.null(by)){
+    sp <- split(seq_len(ncol(se)), se[[by]])
+    for(f in names(sp))
+      mcols(gr2)[[f]] <- rowMeans(assays(se)[[assayName]][,sp[[f]],drop=FALSE])
+    y <- names(sp)
+  }else{
+    mcols(gr2)[[assayName]] <- rowMeans(assays(se)[[assayName]])
+    y <- assayName
+  }
+  ggbio::plotRangesLinkedToData(gr2, stat.y=y, stat.ylab=assayName, 
+                                annotation=list(gr),
+                                size=size, ...) + ggtitle(gene)
+}
+
+# example usage (not run):
+# binTxPlot(rse, ensdb, gene="Arid5a", by="condition")
+```
+
+(Additionally requires the `r BiocStyle::Biocpkg("ggbio")` package)
+
 <br/><br/>
 ***
 

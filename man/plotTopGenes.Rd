@@ -4,7 +4,7 @@
 \alias{plotTopGenes}
 \title{plotTopGenes}
 \usage{
-plotTopGenes(se, n = 25, FDR = 0.05, diffUTR = FALSE, alpha = NULL)
+plotTopGenes(se, n = 25, FDR = 0.05, diffUTR = FALSE, alpha = 1, ...)
 }
 \arguments{
 \item{se}{A bin-wise SummarizedExperiment as produced by

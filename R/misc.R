@@ -79,5 +79,15 @@ rmLCS <- function(x, delim=""){
       se <- addNormalizedAssays(se)
     }
   }
+  if(is.null(rowData(se)$logDensityRatio))
+    rowData(se)$logDensityRatio <- 
+      log(.getDensityRatio(rowData(se)$meanLogDensity, rowData(se)$gene))
   se
+}
+
+.getDensityRatio <- function(logNormDensity, gene){
+  stopifnot(length(logNormDensity)==length(gene))
+  de <- splitAsList(exp(as.numeric(logNormDensity))-1, gene)
+  geneTopDensity <- sapply(-1*(sort(de)*-1),FUN=function(x) mean(head(x,n=3)))
+  round(as.numeric(unlist(de)/geneTopDensity[gene]),3)
 }

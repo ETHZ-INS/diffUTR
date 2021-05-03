@@ -56,6 +56,11 @@ simesAggregation <- function(p.value, geneid){
 #' @param excludeTypes Vector of bin types to exclude.
 #' @param includeTypes Vector of bin types to include (overrides
 #' `excludeTypes`)
+#' @param minDensityRatio Minimum ratio of read density (with respect to the 
+#' gene's average) for a bin to be included.
+#' @param minWidt Minimum bin width to include
+#' @param excludeGeneAmbiguous Logical; whether to exclude bins which are 
+#' ambiguous (i.e. can be from different genes)
 #' @param returnSE Logical; whether to return the updated `se` object
 #' (default), or the gene-level table.
 #'
@@ -73,8 +78,16 @@ simesAggregation <- function(p.value, geneid){
 #' se <- geneLevelStats(se, includeTypes="3UTR")
 #' head(metadata(se)$geneLevel)
 geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL,
-                           returnSE=TRUE){
+                           returnSE=TRUE, minDensityRatio=0.1, minWidth=20,
+                           excludeGeneAmbiguous=TRUE){
   rd <- rowData(se)
+  if(is.null(rd$logDensityRatio))
+    rd$logDensityRatio <- log(.getDensityRatio(rd$meanLogDensity, rd$gene))
+  
+  rd$width <- GenomicRanges::width(se)
+  rd <- rd[rd$logDensityRatio > log(minDensityRatio) & rd$width >= minWidth,]
+  if(excludeGeneAmbiguous) rd <- rd[!rd$geneAmbiguous,]
+  
   if(!is.null(includeTypes)){
     excludeTypes <- setdiff(levels(rd$type), includeTypes)
   }
@@ -85,10 +98,10 @@ geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL,
     tmp <- setdiff(colnames(rd),"exonBaseMean")
     coef <- colnames(rd)[grep("bin.p.value",tmp)-1]
   }
-
   metadata(se)$geneLevel <- .geneLevelStats(DataFrame(
-    bin.pval=rd$bin.p.value, coef=rd[[coef]], width=GenomicRanges::width(se),
-    gene=rd$gene, gene_name=rd$gene_name, meanLogDensity=rd$meanLogDensity))
+    bin.pval=rd$bin.p.value, coef=rd[[coef]], width=rd$width,
+    gene=rd$gene, gene_name=rd$gene_name, meanLogDensity=rd$meanLogDensity,
+    logDensityRatio=rd$logDensityRatio))
 
   if(!returnSE) return(metadata(se)$geneLevel)
   se
@@ -97,34 +110,38 @@ geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL,
 #' @importFrom methods is as
 #' @importFrom IRanges LogicalList NumericList IntegerList mean
 .geneLevelStats <- function(d, gene.qval=NULL){
-  stopifnot(c("bin.pval","coef","gene","width","meanLogDensity") %in%
-              colnames(d))
+  stopifnot(c("bin.pval","coef","gene","width","meanLogDensity","logDensityRatio") 
+              %in% colnames(d))
   d$bin.pval[is.na(d$bin.pval)] <- 1
   if(is.null(gene.qval)) gene.qval <- simesAggregation(d$bin.pval, d$gene)
   d$gene <- droplevels(as.factor(d$gene))
   d$coef[is.na(d$coef)] <- 0
-  g0 <- names(which(!any(LogicalList(split(d$bin.pval<1, d$gene)))))
-  d$weight <- -log10(d$bin.pval)
-  d$weight[is.na(d$weight)] <- 0
-  d$weight[d$gene %in% g0] <- 1
+  d$weight <- -log10(d$bin.pval)-0.5
+  d$weight[is.na(d$weight) | d$weight<0] <- 0
   w <- NumericList(split(d$weight, d$gene))
-  w <- w/sum(w)
+  ws <- sum(w)
+  ww <- which(ws>0)
+  w[ww] <- w[ww]/ws[ww]
+  ww <- which(!(ws>0))
+  g0 <- names(ws[ww])
   co <- NumericList(split(d$coef, d$gene))
-  wi <- IntegerList(split(d$width, d$gene))
+  wi <- IntegerList(split(sqrt(d$width), d$gene))
   de <- NumericList(split(d$meanLogDensity, d$gene))
+  dr <- NumericList(split(exp(d$logDensityRatio), d$gene))
   d2 <- data.frame( row.names = names(co),
                     nb.bins = lengths(co),
                     w.coef=sum(w*co),
                     w.abs.coef=sum(w*abs(co)),
-                    w.width=sum(w*wi),
+                    w.sqWidth=sum(w*wi),
                     w.density=log2(sum(w*de)),
-                    sizeScore=sum(wi/sum(wi)*w*abs(co)),
-                    abs.sizeScore=sum(wi/sum(wi)*w*co),
+                    sizeScore=sum(wi/sum(wi)*w*co),
+                    abs.sizeScore=sum(wi/sum(wi)*w*abs(co)),
                     geneMeanDensity=mean(de,trim=0.05, na.rm=TRUE) )
-  d2$density.ratio <- sum(w*(de-d2$geneMeanDensity))
+  d2[g0,c(3:8)] <- 0
+  d2$density.ratio <- sum(w*dr)
 
   for(f in c(1:2,5:8)) d2[,f] <- round(d2[,f],3)
-  d2$w.width <- as.integer(round(d2$w.width))
+  d2$w.sqWidth <- as.integer(round(d2$w.sqWidth))
   d2$q.value <- gene.qval[row.names(d2)]
   if("gene_name" %in% colnames(d)){
     d <- d[order(d$gene, lengths(d$gene_name)),c("gene","gene_name")]

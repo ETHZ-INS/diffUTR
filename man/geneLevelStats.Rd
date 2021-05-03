@@ -9,7 +9,10 @@ geneLevelStats(
   coef = NULL,
   excludeTypes = NULL,
   includeTypes = NULL,
-  returnSE = TRUE
+  returnSE = TRUE,
+  minDensityRatio = 0.1,
+  minWidth = 20,
+  excludeGeneAmbiguous = TRUE
 )
 }
 \arguments{
@@ -26,6 +29,14 @@ term).}
 
 \item{returnSE}{Logical; whether to return the updated `se` object
 (default), or the gene-level table.}
+
+\item{minDensityRatio}{Minimum ratio of read density (with respect to the 
+gene's average) for a bin to be included.}
+
+\item{excludeGeneAmbiguous}{Logical; whether to exclude bins which are 
+ambiguous (i.e. can be from different genes)}
+
+\item{minWidt}{Minimum bin width to include}
 }
 \value{
 If `returnSE=TRUE` (default), returns the `se` object with an

@@ -43,12 +43,13 @@ geneBinHeatmap <- function(se, gene,
                                        "log10PValue","geneAmbiguous"),
                            anno_columns=c(), anno_colors=list(),
                            removeAmbiguous=FALSE, merge_legends=TRUE,
-                           cluster_columns=FALSE,
+                           cluster_columns=FALSE, minDensityRatio=0.1,
                            left_annotation=NULL, top_annotation=NULL, ...){
   se <- .checkSE(se, checkNorm=TRUE)
   if(length(w <- .matchGene(se, gene))==0) stop("Gene not found!")
   se <- sort(se[w,])
   if(removeAmbiguous) se <- se[!rowData(se)$geneAmbiguous,]
+  se <- se[rowData(se)$logDensityRatio >= log(minDensityRatio),]
   if(is.null(what)){
     h1 <- geneBinHeatmap(se, gene, "logNormDensity", anno_rows=anno_rows,
                          anno_columns=anno_columns, anno_colors=anno_colors,
@@ -131,7 +132,8 @@ geneBinHeatmap <- function(se, gene,
 deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
                        intronSize=2, exonSize=c("sqrt","linear","log"), y=NULL,
                        condition=NULL, size="type", lineSize=1,
-                       colour=NULL, alpha=NULL, removeAmbiguous=TRUE ){
+                       colour=NULL, alpha=NULL, removeAmbiguous=TRUE,
+                       minDensityRatio=0.1){
   se <- .checkSE(se)
   type <- match.arg(type)
   exonSize <- match.arg(exonSize)
@@ -172,6 +174,7 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
 
   se <- sort(se[w,])
   if(removeAmbiguous) se <- se[!rowData(se)$geneAmbiguous,]
+  se <- se[rowData(se)$logDensityRatio >= log(minDensityRatio),]
   de <- rowData(se)
   if(y=="geneNormDensity" && !("geneNormDensity" %in% assayNames(se))){
     si <- vapply(split(seq_len(ncol(se)), se[[condition]]),
@@ -291,13 +294,13 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
 #' data(example_bin_se)
 #' se <- diffSpliceWrapper(example_bin_se, ~condition)
 #' plotTopGenes(se)
-plotTopGenes <- function(se, n=25, FDR=0.05, diffUTR=FALSE, alpha=NULL){
+plotTopGenes <- function(se, n=25, FDR=0.05, diffUTR=FALSE, alpha=1, ...){
   if(is(se, "SummarizedExperiment")){
     se <- .checkSE(se, requireStats=TRUE)
     se <- metadata(se)$geneLevel
   }
   stopifnot(!is.null(se) && (is.data.frame(se) || is(se,"DFrame")))
-  se <- as.data.frame(se)
+  se <- as.data.frame(se[!is.na(se$q.value),])
   if(length(w <- which(se$q.value<=0))>0){
     minnzq <- -log10(min(se$q.value[-w],na.rm=TRUE))
     score <- abs(se[[ifelse(diffUTR,"sizeScore","w.abs.coef")]])
@@ -306,30 +309,35 @@ plotTopGenes <- function(se, n=25, FDR=0.05, diffUTR=FALSE, alpha=NULL){
   }
   if(diffUTR){
     if(is.null(alpha)) alpha <- 1
-    p <- ggplot(se, aes(sizeScore, -log10(q.value))) +
-      geom_point(aes(colour=w.coef, size=geneMeanDensity), alpha=alpha) +
-      scale_colour_gradient2() + xlab("Weighted size score")
+    se$col <- sign(se$sizeScore)
+    se$col[is.na(se$col)] <- 0
+    p <- ggplot(se, aes(sizeScore, -log10(q.value))) + 
+      geom_vline(xintercept=0, linetype="dashed", col="grey") +
+      geom_point(aes(colour=log(density.ratio), size=geneMeanDensity), alpha=alpha) +
+      xlab("Weighted size score") + scale_colour_viridis_c(direction = -1)
     de <- se[se$q.value<FDR,,drop=FALSE]
     de$tmp <- abs(-log10(de$q.value)*de$sizeScore)
+    de$tmp <- -log10(de$q.value)*de$sizeScore/rank(de$q.value)
   }else{
-    se$tmp <- -log10(se$q.value)*se$w.abs.coef
+    se$tmp <- -log10(se$q.value)*se$w.abs.coef/rank(se$q.value)
     if(is.null(alpha)){
       p <- ggplot(se, aes(w.abs.coef, -log10(q.value))) +
-        geom_point(aes(colour=density.ratio, size=geneMeanDensity,
-                       alpha=abs(tmp))) + scale_alpha(guide=FALSE)
+        geom_point(aes(colour=log(density.ratio), size=geneMeanDensity,
+                       alpha=sqrt(sqrt(tmp)))) + scale_alpha(guide=FALSE) +
+        scale_colour_viridis_c(direction = -1)
 
     }else{
       p <- ggplot(se, aes(w.abs.coef, -log10(q.value))) +
-        geom_point(aes(colour=density.ratio, size=geneMeanDensity),
-                   alpha=alpha)
+        geom_point(aes(colour=log(density.ratio), size=geneMeanDensity),
+                   alpha=alpha) + scale_colour_viridis_c(direction = -1)
     }
     p <- p + xlab("Weighted absolute coefficient")
     de <- se[se$q.value<FDR,,drop=FALSE]
   }
   if(n>0){
-    de <- de[head(order(de$tmp, decreasing=TRUE),n),,drop=FALSE]
+    de <- de[head(order(-de$tmp),n),,drop=FALSE]
     if(is.null(de$name)) de$name <- row.names(de)
-    p <- p + geom_text_repel(data=de, aes(label=name))
+    p <- p + geom_text_repel(data=de, aes(label=name), ...)
   }
   p
 }
