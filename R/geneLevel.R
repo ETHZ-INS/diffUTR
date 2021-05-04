@@ -58,7 +58,7 @@ simesAggregation <- function(p.value, geneid){
 #' `excludeTypes`)
 #' @param minDensityRatio Minimum ratio of read density (with respect to the 
 #' gene's average) for a bin to be included.
-#' @param minWidt Minimum bin width to include
+#' @param minWidth Minimum bin width to include
 #' @param excludeGeneAmbiguous Logical; whether to exclude bins which are 
 #' ambiguous (i.e. can be from different genes)
 #' @param returnSE Logical; whether to return the updated `se` object

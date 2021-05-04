@@ -6,6 +6,8 @@
 #' \code{\link{countFeatures}}
 #' @param gene The gene of interest
 #' @param what Type of values (i.e. assay) to plot
+#' @param minDensityRatio Minimum ratio of read density (with respect to the 
+#' gene's average) for a bin to be plotted.
 #' @param anno_rows Row annotation columns (i.e. columns of `rowData(se)`) to
 #' plot
 #' @param anno_columns Column annotation columns (i.e. columns of
@@ -118,6 +120,8 @@ geneBinHeatmap <- function(se, gene,
 #' @param alpha Alpha level, passed to ggplot.
 #' @param removeAmbiguous Logical; whether to remove bins that are
 #' gene-ambiguous (i.e. overlap multiple genes).
+#' @param minDensityRatio Minimum ratio of read density (with respect to the 
+#' gene's average) for a bin to be plotted.
 #'
 #' @return A ggplot object
 #' @importFrom matrixStats colMedians

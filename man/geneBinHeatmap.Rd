@@ -48,6 +48,9 @@ calls `draw(..., merge_legends=TRUE)` around the heatmap.}
 \item{cluster_columns}{Logical; whether to cluster columns (passed to
 \code{\link[ComplexHeatmap]{Heatmap}})}
 
+\item{minDensityRatio}{Minimum ratio of read density (with respect to the 
+gene's average) for a bin to be plotted.}
+
 \item{left_annotation}{Passed to \code{\link[ComplexHeatmap]{Heatmap}},
 overrides `anno_rows`.}
 

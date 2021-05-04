@@ -54,6 +54,9 @@ any colData column.}
 
 \item{removeAmbiguous}{Logical; whether to remove bins that are
 gene-ambiguous (i.e. overlap multiple genes).}
+
+\item{minDensityRatio}{Minimum ratio of read density (with respect to the 
+gene's average) for a bin to be plotted.}
 }
 \value{
 A ggplot object

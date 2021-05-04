@@ -33,10 +33,10 @@ term).}
 \item{minDensityRatio}{Minimum ratio of read density (with respect to the 
 gene's average) for a bin to be included.}
 
+\item{minWidth}{Minimum bin width to include}
+
 \item{excludeGeneAmbiguous}{Logical; whether to exclude bins which are 
 ambiguous (i.e. can be from different genes)}
-
-\item{minWidt}{Minimum bin width to include}
 }
 \value{
 If `returnSE=TRUE` (default), returns the `se` object with an
