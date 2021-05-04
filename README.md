@@ -21,4 +21,10 @@ Finally, _diffUTR_ provides a number of plotting utilities (see the vignette for
 ```{r}
 BiocManager::install("ETHZ-INS/diffUTR")
 ```
+
+If this fails because you don't have the latest R version, you can use:
+```{r}
+BiocManager::install("ETHZ-INS/diffUTR", ref="R36")
+```
+
 See the vignette for more details!
