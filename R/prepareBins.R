@@ -29,11 +29,11 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
                          chrStyle=NULL, maxUTRbinSize=15000,
                          codingOnly=FALSE,
                          genewise=FALSE, stranded=FALSE, verbose=TRUE ){
-
+  
   if(verbose) message("Preparing annotation")
   if(!is.null(APA)) APA <- .prepAPA(APA)
   g <- .prepGeneAnno(g, verbose=verbose)
-
+  
   if(onlyMainChr){
     #Extract only main chromosomes
     g <- keepStandardChromosomes(g, pruning.mode="coarse")
@@ -42,7 +42,7 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   }
   if(!is.null(chrStyle)) seqlevelsStyle(g) <- chrStyle
   seqlevels(g) <- seqlevelsInUse(g)
-
+  
   if(!is.null(APA)){
     if(verbose) message("Generating alternative UTR bins")
     if(is.null(intersect(seqlevels(APA),seqlevels(g)))) 
@@ -52,11 +52,11 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
     seqlevels(APA) <- seqlevelsInUse(APA)
     g <- .extendWithAPA(g, APA)
   }
-
+  
   if(codingOnly) g <- g[g$tx_biotype=="protein_coding"]
-
+  
   if(verbose) message("Merging and disjoining bins")
-
+  
   if(genewise){
     bins <- .disjoinGeneWise(g)
   } else{
@@ -68,7 +68,7 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
                                      }))
   }
   rm(g)
-
+  
   bt <- CharacterList(bins$type)
   if(is.null(APA)){
     bt <- as.factor(ifelse(any(bt=="CDS"), "CDS", "UTR"))
@@ -84,13 +84,13 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   }
   bins$type <- bt
   rm(bt)
-
+  
   levels(bins$type) <- c(levels(bins$type), "non-coding")
   bins$tx <- unstrsplit(CharacterList(bins$tx), sep="+")
-
+  
   # duplicate ranges with more then one overlapping gene so each gene has a
   # separate range
-
+  
   #find the number of genes overlapping this bin
   len<-lengths(bins$gene)
   #for each bin repeat its index as many times as genes overlapping it
@@ -109,7 +109,7 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   if(is(bins$tx_biotype,"AtomicList")){
     bins$type[!any(bins$tx_biotype=="protein_coding")] <- "non-coding"
   }
-
+  
   bins <- sort(bins, by=~gene)
   bins$bin_id <- ave(as.character(strand(bins)),bins$gene,FUN=function(x){
     res<-seq_along(x)
@@ -119,7 +119,7 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
     return(res)
   })
   names(bins)<-NULL
-
+  
   for(f in c("gene_biotype", "tx_biotype")){
     if(f %in% colnames(mcols(bins)))
       mcols(bins)[[f]] <- FactorList(mcols(bins)[[f]])
@@ -128,13 +128,13 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
     if(f %in% colnames(mcols(bins)))
       mcols(bins)[[f]] <- as.factor(mcols(bins)[[f]])
   }
-
+  
   o <- findOverlaps(bins, ignore.strand=!stranded)
   o <- o[from(o) %in% unique(from(o)[duplicated(from(o))])]
   ga <- rowsum(as.integer(bins$gene[from(o)] != bins$gene[to(o)]), from(o))
   bins$geneAmbiguous <- FALSE
   bins$geneAmbiguous[as.integer(row.names(ga))] <- ga[,1]>0
-
+  
   bins
 }
 
@@ -147,11 +147,11 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
       stop("Annotation needs to be provided as gtf")
     }
   }
-
+  
   if(isEnsDb <- is(g,"EnsDb")){
     if(verbose) message("Extracting exon information from EnsDb")
     e <- exons(g, c("exon_id","tx_id","gene_id","gene_name",
-                        "gene_biotype","tx_biotype"))
+                    "gene_biotype","tx_biotype"))
     e$type <- "exon"
     cd <- unlist(cdsBy(g,
                        columns=c("tx_id","tx_biotype","gene_id","gene_name")))
@@ -162,7 +162,7 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
     rm(e,cd)
   }
   if(!is(g,"GRanges")) stop("Annotation is not valid.")
-
+  
   synonyms <- list( type="type",
                     tx=c("tx_id","tx_name","transcript","transcript_id",
                          "transcript_name","tx"),
@@ -177,7 +177,7 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
     mcols(g)[[f]] <- mcols(g)[[ff[1]]]
     if(f!=ff[1]) mcols(g)[[ff[[1]]]] <- NULL
   }
-
+  
   if(!isEnsDb){
     if(!any(g$type=="gene") && any(g$type=="transcript")){
       if(!is.factor(g$type)) g$type <- as.factor(g$type)
@@ -206,12 +206,13 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
       apa <- readRDS(apa)
       if(!is(apa, "GRanges")) stop("If a RDS file, apa should be a GRanges")
     }else if(grepl("\\.bed$|\\.bed.gz$", apa)){
-      apa <- tryCatch(rtracklayer::import.bed(apa), error=function(e){
-        extraColvect <- c(percentage="numeric", numberofprot="integer",
-                          tpm2="numeric",encod="character",addinfo="character")
-        rtracklayer::import("apa.mm38.bed.gz", format="bed",
-                            extraCols=extraColvect)
-      })
+      apa <- tryCatch(rtracklayer::import.bed(apa), 
+                      error=function(e){
+                        message(e, "\n", "Try to add a vector of extra columns...")
+                        extraColvect <- c(percentage="numeric", numberofprot="integer",
+                                          tpm2="numeric",encod="character",addinfo="character")
+                        rtracklayer::import(apa, format="bed", extraCols=extraColvect)
+                      })
     }
   }else if (!is(apa, "GRanges")) {
     stop("Annotation has to be provided as GRanges or bed")
@@ -228,55 +229,55 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   gtf1<-g[g$type %in% c("gene", "exon"),]
   #resize gene to 1 as only start of a gene would be a boundry
   gtf1[gtf1$type=="gene",]<-resize(gtf1[gtf1$type=="gene",],1)
-
+  
   # get regions which could be boundrys for bins
-
+  
   #seperate by strand because of slightly different syntax
   APAplus<-APA[(as.character(strand(APA))=="+")]
   APAminus<-APA[(as.character(strand(APA))=="-")]
-
+  
   # find boundry region before each APA site...some have none,
   # so ignore these and do it again
   outmin<-follow(APAminus, gtf1)
   APAminus<-APAminus[is.na(outmin)==FALSE]
   outmin<-follow(APAminus, gtf1, select="all")
   APAminus<-APAminus[from(outmin)]
-
+  
   outplus<-follow(APAplus, gtf1)
   APAplus<-APAplus[is.na(outplus)==FALSE]
   outplus<-follow(APAplus, gtf1, select="all")
   APAplus<-APAplus[from(outplus)]
-
-
+  
+  
   minusranges<-gtf1[to(outmin),]
   plusranges<-gtf1[to(outplus),]
-
+  
   #create regions from boundry to APA and include metadata
-
+  
   beginplusbin<-end(plusranges)+1
   endplusbin<-end(APAplus)
-
+  
   beginminusbin<-start(APAminus)
   endminusbin<-start(minusranges)-1
-
+  
   plusbin<-GRanges(seqnames=seqnames(plusranges),
                    IRanges(start=beginplusbin, end=endplusbin),
                    strand=as.character(strand(plusranges)))
-
+  
   minusbin<-GRanges(seqnames=seqnames(minusranges),
                     IRanges(start=beginminusbin, end=endminusbin),
                     strand=as.character(strand(minusranges)))
   mcols(plusbin)<-mcols(plusranges)
   mcols(minusbin)<-mcols(minusranges)
-
+  
   #merge all regions necessary for differential analysis
   a <- c(plusbin,minusbin)
   a$type<-"UTR"
   #threshold
   a <- a[GenomicRanges::width(a)<maxUTRbinSize,]
-
+  
   b <- GenomicRanges::setdiff(g[g$type=="exon"], g[g$type=="CDS"])
-
+  
   o<-as(findOverlaps(b,g[g$type=="exon"]),"List")
   ex<-extractList(mcols(g[g$type=="exon"]), o)
   b <- rep(b, lengths(o))
@@ -285,48 +286,48 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   b$type[b$tx_biotype=="protein_coding"] <- "UTR"
   b<-c(b,g[g$type=="CDS"])
   # #b$type[b$type=="CDS"]<-"exon"
-
+  
   cds<-g[g$type=="CDS"]
-
+  
   a<-a[!is.na(a$tx)]
-
+  
   cdsminus<-cds[as.character(strand(cds))=="-",]
   cdsplus<-cds[as.character(strand(cds))=="+",]
-
+  
   #split by transcripts
   cdsplus<- split(cdsplus, cdsplus$tx)
   cdsminus<- split(cdsminus, cdsminus$tx)
-
+  
   #find direct index of the last cds of each transcript and get them
   l<-elementNROWS(cdsplus)
   l<-cumsum(l)
   lastcdsplus<-unlist(sort(cdsplus))[l,]
-
+  
   l<-elementNROWS(cdsminus)
   l<-cumsum(l)-l+1
   lastcdsminus<-unlist(sort(cdsminus))[l,]
   lastCDS<-c(lastcdsminus,lastcdsplus)
-
+  
   end<-data.frame(tx=lastCDS$tx,end=end(lastCDS))
   end$end[as.character(strand(lastCDS))=="-"] <-
     start(lastCDS)[as.character(strand(lastCDS))=="-"]
-
+  
   a <- c(a,b)
   o <- order(a$tx)
   a<-a[o,]
   o <- order(end$tx)
   end<-end[o,]
-
+  
   tx.with.cds <- a$tx %in% end$tx
-
+  
   tx.nexons <- rowsum(rep(1,length(a$tx[tx.with.cds])),
                       group=a$tx[tx.with.cds], reorder = FALSE)
   ntx <- length(unique(end$tx))
   tidx <- rep(seq_len(ntx), times=tx.nexons)
   a$type <- as.character(a$type)
-
+  
   # UTR that is 3'
-
+  
   nocds<-a[!tx.with.cds]
   a<-a[tx.with.cds]
   a$type[a$type=="UTR" & as.character(strand(a))=="+" &
@@ -341,38 +342,38 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   a<-split(a,a$gene)
   #disjoin them to counting bins
   bins<-disjoin(a,with.revmap=TRUE)
-
+  
   #reverse mapping indexes are indexes of the corresponding list not of the
   #unlisted bins, so find the length of all sublists
   #for each sublist find the total number of previous features
   g<-cumsum(c(0,head(lengths(a),-1)))
-
+  
   #this needs to be added to every revmap index of features that were created
   #from this sublist, so expand by the number of features
-
+  
   adder<-rep(g,lengths(bins))
   bins<-unlist(bins)
-
+  
   #and as there are list of indexes, expand by the number of indexes
   adder<-rep(adder,lengths(bins$revmap))
   trueidx<-unlist(bins$revmap)+adder
-
+  
   #get back metadata, tx_name as string with name of each overlapping tx
   #name seperated by + gene_id as List of all genes overlapping this bin
   #type as string: with types overlapping this bin sperated by +
   #booltype->is utr or not
-
-
+  
+  
   # for each bin create as many slots as there were overlapping regions and
   # give them the index of the bin
   f <- rep(seq_along(bins), lengths(bins$revmap))
-
+  
   #put the overlapping regions in to the slots and split them as list by the
   #index (bin they belong to), apply sort and unique in order to only get the
   #metadata once
   mcols(bins) <- DataFrame(lapply( mcols(unlist(a))[trueidx,],
-                                FUN=function(x){
-                                  sort(unique(splitAsList(x,f)))
-                                }))
+                                   FUN=function(x){
+                                     sort(unique(splitAsList(x,f)))
+                                   }))
   bins
 }
