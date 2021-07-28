@@ -34,7 +34,7 @@ Imports:
     IRanges,
     ensembldb,
     viridisLite
-Suggests: BiocStyle, knitr
+Suggests: BiocStyle, knitr, rmarkdown
 biocViews: GeneExpression
 BugReports: https://github.com/ETHZ-INS/diffUTR
 VignetteBuilder: knitr
