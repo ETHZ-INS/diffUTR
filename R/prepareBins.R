@@ -209,8 +209,7 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
       apa <- tryCatch(rtracklayer::import.bed(apa), error=function(e){
         extraColvect <- c(percentage="numeric", numberofprot="integer",
                           tpm2="numeric",encod="character",addinfo="character")
-        rtracklayer::import("apa.mm38.bed.gz", format="bed",
-                            extraCols=extraColvect)
+        rtracklayer::import(apa", format="bed", extraCols=extraColvect)
       })
     }
   }else if (!is(apa, "GRanges")) {
