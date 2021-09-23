@@ -45,6 +45,6 @@ data("example_gene_annotation", package="diffUTR")
 bins <- prepareBins(example_gene_annotation)
 bam_files <- list.files(system.file("extdata", package="diffUTR"),
                         pattern="bam$", full=TRUE)
-se <- countFeatures(bam_files, bins, verbose=FALSE)
-se
+# not run
+# se <- countFeatures(bam_files, bins, verbose=FALSE)
 }

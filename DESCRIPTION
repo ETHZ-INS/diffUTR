@@ -1,7 +1,7 @@
 Package: diffUTR
 Type: Package
 Title: diffUTR: Streamlining differential exon and 3' UTR usage
-Version: 1.1.1
+Version: 1.1.2
 Depends: R (>= 4.0)
 Authors@R: c(
 	person("Pierre-Luc", "Germain", email="pierre-luc.germain@hest.ethz.ch", 
@@ -40,4 +40,4 @@ BugReports: https://github.com/ETHZ-INS/diffUTR
 VignetteBuilder: knitr
 License: GPL-3
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
