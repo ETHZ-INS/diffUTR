@@ -14,6 +14,8 @@ In this way, _diffUTR_ outperforms alternative methods for detecting UTR changes
 
 <img src="inst/docs/benchmark.png" alt="Differential UTR usage benchmark" width="600px" style="margin-top: 10px; margin-bottom: 15px;" />
 
+**Note, however, that for all methods the FDR is considerably higher than the nominal one given by the method. For this reason, we urge users to use more stringent thresholds to avoid spurious results.**
+
 Finally, _diffUTR_ provides a number of plotting utilities (see the vignette for more details), compatible with the results of any of the three underlying statistical methods.
 
 ## Installation
