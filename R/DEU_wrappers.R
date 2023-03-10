@@ -177,6 +177,8 @@ DEXSeqWrapper <- function(se, design=~sample+exon+condition:exon,
                  gene=rowData(se)$gene, width=width(se),
                  meanLogDensity=rowData(se)$meanLogDensity,
                  logDensityRatio=rowData(se)$logDensityRatio)
+  if("gene" %in% colnames(rowData(se)))
+    d$gene_name <- rowData(se)$gene
   if("gene_name" %in% colnames(rowData(se)))
     d$gene_name <- rowData(se)$gene_name
   

@@ -98,6 +98,7 @@ geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL,
     tmp <- setdiff(colnames(rd),"exonBaseMean")
     coef <- colnames(rd)[grep("bin.p.value",tmp)-1]
   }
+  if(is.null(rd$gene_name)) rd$gene_name <- rd$gene
   metadata(se)$geneLevel <- .geneLevelStats(DataFrame(
     bin.pval=rd$bin.p.value, coef=rd[[coef]], width=rd$width,
     gene=rd$gene, gene_name=rd$gene_name, meanLogDensity=rd$meanLogDensity,
@@ -154,7 +155,6 @@ geneLevelStats <- function(se, coef=NULL, excludeTypes=NULL, includeTypes=NULL,
     }else{
       d$name <- d$gene_name
     }
-    d$name <- unstrsplit(d$gene_name, sep = "/")
     d2 <- merge(d[,"name",drop=FALSE], d2, by="row.names")
     row.names(d2) <- d2$Row.names
     d2 <- d2[,-1]

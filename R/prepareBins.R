@@ -132,6 +132,7 @@ prepareBins <- function( g, APA=NULL, onlyMainChr=TRUE, removeAntisense=TRUE,
   o <- findOverlaps(bins, ignore.strand=!stranded)
   o <- o[from(o) %in% unique(from(o)[duplicated(from(o))])]
   ga <- rowsum(as.integer(bins$gene[from(o)] != bins$gene[to(o)]), from(o))
+  if(is.null(bins$gene_name)) bins$gene_name <- bins$gene
   bins$geneAmbiguous <- FALSE
   bins$geneAmbiguous[as.integer(row.names(ga))] <- ga[,1]>0
 
