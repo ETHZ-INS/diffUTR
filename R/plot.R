@@ -153,10 +153,8 @@ deuBinPlot <- function(se, gene, type=c("summary","condition","sample"),
   w <- .matchGene(se, gene)
   if(length(w)==0) stop("Gene not found in the data!")
   if(type=="condition"){
-    if(is.null(condition) && "condition" %in% colnames(colData(se))){
-      condition <- "condition"
-    }else{
-      condition <- "group"
+    if(is.null(condition)){
+      condition <- ifelse("condition" %in% colnames(colData(se)), "condition", "group)
     }
     stopifnot(length(condition)==1 && condition %in% colnames(colData(se)))
   }
