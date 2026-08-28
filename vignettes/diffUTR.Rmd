@@ -39,7 +39,7 @@ and produce highly similar outputs, so that they can all be used with the same
 downstream plotting functions (Figure 1A).
 
 Based on various benchmarks (e.g. 
-[Sonenson et al. 2016](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0862-3);
+[Soneson et al. 2016](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0862-3);
 see also [our paper](https://doi.org/10.1186/s12859-021-04114-7)), 
 `r BiocStyle::Biocpkg("DEXSeq")` is the most accurate of the three methods, 
 and should therefore be the method of choice. It is however very slow and does 
